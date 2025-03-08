@@ -1,0 +1,33 @@
+﻿<Solution>
+  <Folder Name="/.config/">
+    <File Path=".config\dotnet-tools.json" />
+  </Folder>
+  <Folder Name="/.files/">
+    <File Path=".editorconfig" />
+    <File Path=".editoricon.png" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="build.cmd" />
+    <File Path="build.ps1" />
+    <File Path="build.sh" />
+    <File Path="CHANGELOG.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="global.json" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+    <File Path="Makefile" />
+  </Folder>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
+    <File Path=".github\workflows\clear.yml" />
+  </Folder>
+  <Folder Name="/.nuget/">
+    <File Path=".nuget\NuGet.config" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src\Core\Core.csproj" Type="Classic C#" />
+    <Project Path="src\Runner\Runner.csproj" Type="Classic C#">
+      <Configuration Solution="Release|Any CPU" Project="Release|Any CPU|Deploy" />
+    </Project>
+  </Folder>
+</Solution>
