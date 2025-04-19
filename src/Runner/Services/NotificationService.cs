@@ -3,12 +3,10 @@ using Gearbox.Core.Models;
 
 namespace Gearbox.Runner.Services
 {
-  public class NotificationService : INotificationService
-  {
-
-    public void Show(Notification notification)
+    public class NotificationService : INotificationService
     {
-      return;
+        public void Show(Notification notification)
+        {
+        }
     }
-  }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Resources;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Gearbox Runner")]
@@ -40,4 +41,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.*")]
 [assembly: AssemblyFileVersion("1.0.0")]
 [assembly: AssemblyInformationalVersion("1.0.0-dev.1+f8358a4a422b60e37d0b58a5d17d8cc4b0442020")]
+
+[assembly: InternalsVisibleTo("Gearbox.UnitTest")]
 
