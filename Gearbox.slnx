@@ -30,4 +30,7 @@
       <Configuration Solution="Release|Any CPU" Project="Release|Any CPU|Deploy" />
     </Project>
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests\UnitTest\UnitTest.csproj" Type="Classic C#" />
+  </Folder>
 </Solution>
