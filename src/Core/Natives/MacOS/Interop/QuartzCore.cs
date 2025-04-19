@@ -4,87 +4,85 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using MonoMac.CoreGraphics;
 using MonoMac.Foundation;
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
 
 namespace Gearbox.Core.Natives.MacOS.Interop
 {
-  
-  [SupportedOSPlatform("macOS")]
-  internal static class QuartzCore
-  {
-
-    internal class KCgWindowBounds
+    [SupportedOSPlatform("macOS")]
+    internal static class QuartzCore
     {
-      internal uint _height;
-      internal uint _width;
-      internal uint _x;
-      internal uint _y;
-      public override string ToString() => $"{{{_width}, {_height}, {_x}, {_y}}}";
-    }
-    
-    internal class KCgWindow
-    {
-      internal uint _kCgWindowAlpha;
-      internal KCgWindowBounds? _kCgWindowBounds;
-      internal uint _kCgWindowIsOnscreen;
-      internal int _kCgWindowLayer;
-      internal uint _kCgWindowMemoryUsage;
-      internal uint _kCgWindowNumber;
-      internal string? _kCgWindowOwnerName;
-      internal uint _kCgWindowOwnerPid;
-      internal uint _kCgWindowSharingState;
-      internal uint _kCgWindowStoreType;
-
-      public override string ToString() => $"{_kCgWindowOwnerName} ({_kCgWindowOwnerPid})";
-
-      internal void Read(NSObject source)
-      {
-        var props = GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-        foreach (var prop in props)
+        internal class KCgWindowBounds
         {
-          var key = new NSString(prop.Name);
-          var value = source.ValueForKey(key);
-          if (prop.FieldType == typeof(KCgWindowBounds))
-          {
-            var innerProps = prop.FieldType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-            var innerVal = new KCgWindowBounds();
-            foreach (var iprop in innerProps)
-            {
-              var ikey = new NSString(iprop.Name);
-              var ival = value.ValueForKey(ikey);
-              if (iprop.FieldType == typeof(string))
-              {
-                iprop.SetValue(innerVal, ival.Description);
-              }
-              else if (iprop.FieldType == typeof(uint))
-              {
-                iprop.SetValue(innerVal, uint.Parse(ival.Description));
-              }
-              else if (iprop.FieldType == typeof(int))
-              {
-                iprop.SetValue(innerVal, int.Parse(ival.Description));
-              }
-            }
-            prop.SetValue(this, innerVal);
-          }
-          else if (prop.FieldType == typeof(string))
-          {
-            prop.SetValue(this, value.Description);
-          }
-          else if (prop.FieldType == typeof(uint))
-          {
-            prop.SetValue(this, uint.Parse(value.Description));
-          }
-          else if (prop.FieldType == typeof(int))
-          {
-            prop.SetValue(this, int.Parse(value.Description));
-          }
-          
+            internal uint Height;
+            internal uint Width;
+            internal uint X;
+            internal uint Y;
+            public override string ToString() => $"{{{Width}, {Height}, {X}, {Y}}}";
         }
-      }
-      
+
+        internal class KCgWindow
+        {
+            internal uint KCgWindowAlpha;
+            internal KCgWindowBounds? KCgWindowBounds;
+            internal uint KCgWindowIsOnscreen;
+            internal int KCgWindowLayer;
+            internal uint KCgWindowMemoryUsage;
+            internal uint KCgWindowNumber;
+            internal string? KCgWindowOwnerName;
+            internal uint KCgWindowOwnerPid;
+            internal uint KCgWindowSharingState;
+            internal uint KCgWindowStoreType;
+
+            public override string ToString() => $"{KCgWindowOwnerName} ({KCgWindowOwnerPid})";
+
+            internal void Read(NSObject source)
+            {
+                var props = GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+                foreach (var prop in props)
+                {
+                    var key = new NSString(prop.Name);
+                    var value = source.ValueForKey(key);
+                    if (prop.FieldType == typeof(KCgWindowBounds))
+                    {
+                        var innerProps = prop.FieldType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+                        var innerVal = new KCgWindowBounds();
+                        foreach (var iprop in innerProps)
+                        {
+                            var ikey = new NSString(iprop.Name);
+                            var ival = value.ValueForKey(ikey);
+                            if (iprop.FieldType == typeof(string))
+                            {
+                                iprop.SetValue(innerVal, ival.Description);
+                            }
+                            else if (iprop.FieldType == typeof(uint))
+                            {
+                                iprop.SetValue(innerVal, uint.Parse(ival.Description));
+                            }
+                            else if (iprop.FieldType == typeof(int))
+                            {
+                                iprop.SetValue(innerVal, int.Parse(ival.Description));
+                            }
+                        }
+
+                        prop.SetValue(this, innerVal);
+                    }
+                    else if (prop.FieldType == typeof(string))
+                    {
+                        prop.SetValue(this, value.Description);
+                    }
+                    else if (prop.FieldType == typeof(uint))
+                    {
+                        prop.SetValue(this, uint.Parse(value.Description));
+                    }
+                    else if (prop.FieldType == typeof(int))
+                    {
+                        prop.SetValue(this, int.Parse(value.Description));
+                    }
+                }
+            }
+        }
+
+        [DllImport(@"/System/Library/Frameworks/QuartzCore.framework/QuartzCore")]
+        internal static extern IntPtr CGWindowListCopyWindowInfo(CGWindowListOption option, uint relativeToWindow);
     }
-    
-    [DllImport(@"/System/Library/Frameworks/QuartzCore.framework/QuartzCore")]
-    internal static extern IntPtr CGWindowListCopyWindowInfo(CGWindowListOption option, uint relativeToWindow);
-  }
 }

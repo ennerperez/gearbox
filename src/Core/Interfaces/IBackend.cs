@@ -3,14 +3,13 @@ using Gearbox.Core.Types;
 
 namespace Gearbox.Core.Interfaces
 {
-  public interface IBackend
-  {
-    string GetActiveWindowTitle();
-    RegisterStatus GetRegisterStatus();
-    Task RegisterAsync();
-    Task UnregisterAsync();
-    Task RegisterOrUnregisterAsync();
-    void OpenSettings();
-
-  }
+    public interface IBackend
+    {
+        string GetActiveWindowTitle();
+        RegisterStatus GetRegisterStatus();
+        Task<bool> RegisterAsync();
+        Task<bool> UnregisterAsync();
+        Task<bool> RegisterOrUnregisterAsync();
+        void OpenSettings();
+    }
 }

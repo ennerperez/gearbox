@@ -2,8 +2,8 @@
 
 namespace Gearbox.Core.Interfaces
 {
-  public interface INotificationService
-  {
-    void Show(Notification notification);
-  }
+    public interface INotificationService
+    {
+        void Show(Notification notification);
+    }
 }
