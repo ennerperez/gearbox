@@ -10,12 +10,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Gearbox.Core.Services
 {
-    public class QueueService : IQueueService
+    public class DbQueueService : IQueueService
     {
         private readonly ILogger _logger;
         private readonly ILiteDatabaseAsync _database;
 
-        public QueueService(ILiteDatabaseAsync database, ILogger<IQueueService> logger)
+        public double ExpireOn { get; set; }
+
+        public DbQueueService(ILiteDatabaseAsync database, ILogger<IQueueService> logger)
         {
             _database = database;
             _logger = logger;
@@ -36,20 +38,20 @@ namespace Gearbox.Core.Services
             return null;
         }
 
-        public async Task<IEnumerable<PeekedMessage>?> PeekMessagesAsync(string queueName = "", int? maxMessages = default, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<PeekedMessage>> PeekMessagesAsync(string queueName = "", int? maxMessages = null, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(queueName)) { return Array.Empty<PeekedMessage>(); }
+            if (string.IsNullOrWhiteSpace(queueName)) { return []; }
 
             var collection = await PrepareCollectionAsync(queueName);
 
             var items = await collection.FindAsync(p => (p.ExpiresOn == null || p.ExpiresOn >= DateTime.UtcNow) && (p.NextVisibleOn == null || p.NextVisibleOn <= DateTime.UtcNow));
-            if (items == null) { return Array.Empty<PeekedMessage>(); }
+            if (items == null) { return []; }
 
             var messages = items.OrderByDescending(m => m.InsertedOn).Take(maxMessages ?? 1);
             var peekMessagesAsync = messages as PeekedMessage[] ?? messages.ToArray();
             if (peekMessagesAsync.Length != 0) { return await Task.FromResult(peekMessagesAsync); }
 
-            return Array.Empty<PeekedMessage>();
+            return [];
         }
 
         private async Task<ILiteCollectionAsync<QueueMessage>> PrepareCollectionAsync(string queueName)
@@ -61,7 +63,7 @@ namespace Gearbox.Core.Services
             return collection;
         }
 
-        public async Task<QueueMessage?> ReceiveMessageAsync(string queueName = "", TimeSpan? visibilityTimeout = default, CancellationToken cancellationToken = default)
+        public async Task<QueueMessage?> ReceiveMessageAsync(string queueName = "", TimeSpan? visibilityTimeout = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(queueName)) { return null; }
 
@@ -94,17 +96,17 @@ namespace Gearbox.Core.Services
             return await Task.FromResult(message);
         }
 
-        public async Task<IEnumerable<QueueMessage>?> ReceiveMessagesAsync(string queueName = "", int? maxMessages = default, TimeSpan? visibilityTimeout = default, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<QueueMessage>> ReceiveMessagesAsync(string queueName = "", int? maxMessages = null, TimeSpan? visibilityTimeout = null, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(queueName)) { return Array.Empty<QueueMessage>(); }
+            if (string.IsNullOrWhiteSpace(queueName)) { return []; }
 
             var collection = await PrepareCollectionAsync(queueName);
 
             var items = await collection.FindAsync(p => (p.ExpiresOn == null || p.ExpiresOn >= DateTime.UtcNow) && (p.NextVisibleOn == null || p.NextVisibleOn <= DateTime.UtcNow));
-            if (items == null) { return (IEnumerable<QueueMessage>)Array.Empty<PeekedMessage>(); }
+            if (items == null) { return []; }
 
             var messages = items.OrderByDescending(m => m.InsertedOn).Take(maxMessages ?? 1).ToArray();
-            if (messages.Length == 0) { return (IEnumerable<QueueMessage>)Array.Empty<PeekedMessage>(); }
+            if (messages.Length == 0) { return []; }
 
             var ids = messages.Select(m => m.MessageId).ToArray();
             try

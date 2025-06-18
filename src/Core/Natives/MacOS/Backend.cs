@@ -24,7 +24,7 @@ namespace Gearbox.Core.Natives.MacOS
 
         public string GetActiveWindowTitle()
         {
-#if MACOS
+#if OSX
             var windowInfo = QuartzCore.CGWindowListCopyWindowInfo(CGWindowListOption.OnScreenOnly, 0);
             var values = (NSArray)Runtime.GetNSObject<NSArray>(windowInfo);
 

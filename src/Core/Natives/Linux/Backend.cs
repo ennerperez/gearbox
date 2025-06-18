@@ -16,9 +16,9 @@ namespace Gearbox.Core.Natives.Linux
     public class Backend : IBackend
     {
         private readonly INotificationService _notificationService;
-        private readonly ILogger<Backend> _logger;
+        private readonly ILogger<IBackend> _logger;
 
-        public Backend(INotificationService notificationService, ILogger<Backend> logger)
+        public Backend(INotificationService notificationService, ILogger<IBackend> logger)
         {
             _notificationService = notificationService;
             _logger = logger;

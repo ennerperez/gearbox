@@ -5,11 +5,11 @@ using Gearbox.Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using Shouldly;
 using OS = System.Runtime.OperatingSystemExtensions;
 
-namespace Gearbox.UnitTest.Core
+namespace Gearbox.UnitTest.Core.Services
 {
-    [ExcludeFromCodeCoverage]
     [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance")]
     public class BrowserServiceTest
     {
@@ -39,8 +39,7 @@ namespace Gearbox.UnitTest.Core
         public async Task LaunchUrlByBrowserAsync(string url)
         {
             var processId = await _browserService.LaunchAsync(url);
-            Assert.NotNull(processId);
-            Assert.True(processId > 0);
+            processId.ShouldBeGreaterThan(0);
         }
 
         [Theory]
@@ -49,8 +48,7 @@ namespace Gearbox.UnitTest.Core
         public async Task LaunchUrlBySourceAsync(string url, string window)
         {
             var processId = await _browserService.LaunchAsync(url, window);
-            Assert.NotNull(processId);
-            Assert.True(processId > 0);
+            processId.ShouldBeGreaterThan(0);
         }
 
         [Theory]
@@ -58,8 +56,7 @@ namespace Gearbox.UnitTest.Core
         public async Task LaunchUrlByTypeAsync(string url)
         {
             var processId = await _browserService.LaunchAsync(url);
-            Assert.NotNull(processId);
-            Assert.True(processId > 0);
+            processId.ShouldBeGreaterThan(0);
         }
     }
 }

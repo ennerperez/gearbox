@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
 
@@ -41,3 +42,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0")]
 [assembly: AssemblyInformationalVersion("1.0.0-dev.1+f8358a4a422b60e37d0b58a5d17d8cc4b0442020")]
 
+[assembly: ExcludeFromCodeCoverage]

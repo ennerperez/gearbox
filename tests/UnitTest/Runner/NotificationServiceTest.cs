@@ -7,7 +7,6 @@ using Gearbox.Runner.Services;
 
 namespace Gearbox.UnitTest.Runner
 {
-    [ExcludeFromCodeCoverage]
     [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance")]
     public class NotificationServiceTest
     {
@@ -29,8 +28,8 @@ namespace Gearbox.UnitTest.Runner
                 Title = "Test",
                 Type = NotificationType.Information,
             });
-            Assert.True(true);
             await Task.Delay(1000);
+            Assert.True(true);
         }
     }
 }

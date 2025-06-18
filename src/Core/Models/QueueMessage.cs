@@ -1,4 +1,6 @@
-﻿namespace Gearbox.Core.Models
+﻿using System;
+
+namespace Gearbox.Core.Models
 {
     public class QueueMessage : PeekedMessage
     {
@@ -6,6 +8,7 @@
 
         internal QueueMessage(string messageText)
         {
+            MessageId = Guid.NewGuid().ToString();
             MessageText = messageText;
         }
 

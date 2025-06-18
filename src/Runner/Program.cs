@@ -26,8 +26,8 @@ namespace Gearbox.Runner
     [ExcludeFromCodeCoverage]
     public static class Program
     {
-        internal static IServiceProvider? Services { get; private set; }
-        internal static IConfiguration? Configuration { get; private set; }
+        private static IServiceProvider? Services { get; set; }
+        private static IConfiguration? Configuration { get; set; }
 
         [STAThread]
         public static void Main(string[] args)
@@ -130,7 +130,7 @@ namespace Gearbox.Runner
 
             // Core Services
             builder.Services
-                .AddInfrastrcuture()
+                .AddInfrastructure()
                 .AddPersistence()
                 .AddCore()
                 .AddRunner();
