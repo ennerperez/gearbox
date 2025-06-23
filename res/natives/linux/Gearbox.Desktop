@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.1
+Type=Application
+Name=Gearbox
+GenericName=Web Browser
+Icon={WORKDIR}/gearbox.svg
+Exec=./Gearbox.Runner %u
+Path={WORKDIR}/
+Terminal=false
+MimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ipfs;x-scheme-handler/ipns;application/x-opera-download;
+Categories=Network;WebBrowser;
+StartupNotify=true
+StartupWMClass=Gearbox
