@@ -1,17 +1,32 @@
 configuration = Release
 
+nuke-prepare:
+	dotnet nuke --target prepare
+
+nuke-clean:
+	dotnet nuke --target clean
+
+nuke-restore:
+	dotnet nuke --target restore
+
 restore:
-	dotnet tool restore
+	dotnet restore
 
 win-publish:
+	dotnet publish src/Host/Host.csproj --self-contained true -p:PublishSingleFile=true --runtime win-x64 --configuration $(configuration) --output publish/win-x64
+	dotnet publish src/Host/Host.csproj --self-contained true -p:PublishSingleFile=true --runtime win-arm64 --configuration $(configuration) --output publish/win-arm64
 	dotnet publish src/Runner/Runner.csproj --self-contained true -p:PublishSingleFile=true --runtime win-x64 --configuration $(configuration) --output publish/win-x64
 	dotnet publish src/Runner/Runner.csproj --self-contained true -p:PublishSingleFile=true --runtime win-arm64 --configuration $(configuration) --output publish/win-arm64
 
 osx-publish:
+	dotnet publish src/Host/Host.csproj --self-contained true -p:PublishSingleFile=true --runtime osx-x64 --configuration $(configuration) --output publish/osx-x64
+	dotnet publish src/Host/Host.csproj --self-contained true -p:PublishSingleFile=true --runtime osx-arm64 --configuration $(configuration) --output publish/osx-arm64
 	dotnet publish src/Runner/Runner.csproj --self-contained true -p:PublishSingleFile=true --runtime osx-x64 --configuration $(configuration) --output publish/osx-x64
 	dotnet publish src/Runner/Runner.csproj --self-contained true -p:PublishSingleFile=true --runtime osx-arm64 --configuration $(configuration) --output publish/osx-arm64
 
 linux-publish:
+	dotnet publish src/Host/Host.csproj --self-contained true -p:PublishSingleFile=true --runtime linux-x64 --configuration $(configuration) --output publish/linux-x64
+	dotnet publish src/Host/Host.csproj --self-contained true -p:PublishSingleFile=true --runtime linux-arm64 --configuration $(configuration) --output publish/linux-arm64
 	dotnet publish src/Runner/Runner.csproj --self-contained true -p:PublishSingleFile=true --runtime linux-x64 --configuration $(configuration) --output publish/linux-x64
 	dotnet publish src/Runner/Runner.csproj --self-contained true -p:PublishSingleFile=true --runtime linux-arm64 --configuration $(configuration) --output publish/linux-arm64
 

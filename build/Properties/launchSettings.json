@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "Build.Prepare": {
+      "description": "Prepares the solution to build, updates build variables with desired configurations",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Prepare"
+    },
+    "Build.Clean": {
+      "description": "Clean all the output folders",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Clean"
+    },
+    "Build.Restore": {
+      "description": "Restore packages, libraries and tooling",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Restore"
+    },
+    "Build.Compile": {
+      "description": "Compile the project",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Compile"
+    },
+    "Build.Test": {
+      "description": "Execute the test projects",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Test"
+    },
+    "Build.Coverage": {
+      "description": "Execute the test projects with code coverage",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Coverage"
+    }
+  }
+}
