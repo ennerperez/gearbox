@@ -11,5 +11,6 @@ namespace Gearbox.Core.Interfaces
         Task<bool> UnregisterAsync();
         Task<bool> RegisterOrUnregisterAsync();
         void OpenSettings();
+        void StartHost();
     }
 }

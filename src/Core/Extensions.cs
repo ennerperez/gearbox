@@ -26,10 +26,17 @@ namespace Gearbox.Core
             return serviceCollection;
         }
 
-        public static IServiceCollection AddInfrastructure(this IServiceCollection serviceCollection)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection serviceCollection, bool useMemory = false)
         {
-            //serviceCollection.AddSingleton<IQueueService, QueueService>();
-            serviceCollection.AddSingleton<IQueueService, MemoryQueueService>();
+            if (useMemory)
+            {
+                serviceCollection.AddSingleton<IQueueService, MemoryQueueService>();
+            }
+            else
+            {
+                serviceCollection.AddSingleton<IQueueService, DbQueueService>();
+            }
+
             return serviceCollection;
         }
 

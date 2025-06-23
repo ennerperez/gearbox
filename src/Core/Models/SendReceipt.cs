@@ -20,5 +20,6 @@ namespace Gearbox.Core.Models
         public DateTimeOffset? InsertionTime { get; private set; }
 
         public string MessageId { get; private set; }
+        public bool IsSuccess { get; set; }
     }
 }

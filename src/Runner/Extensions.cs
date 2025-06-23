@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Gearbox.Core.Interfaces;
-using Gearbox.Runner.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Gearbox.Runner
@@ -10,7 +8,6 @@ namespace Gearbox.Runner
     {
         public static IServiceCollection AddRunner(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<INotificationService, NotificationService>();
             return serviceCollection;
         }
     }

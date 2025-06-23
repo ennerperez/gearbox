@@ -3,9 +3,9 @@ using System.Reflection;
 using Gearbox.Core.Interfaces;
 using Gearbox.Core.Models;
 using Gearbox.Core.Types;
-using Gearbox.Runner.Services;
+using Gearbox.Host.Services;
 
-namespace Gearbox.UnitTest.Runner
+namespace Gearbox.UnitTest.Host
 {
     [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance")]
     public class NotificationServiceTest

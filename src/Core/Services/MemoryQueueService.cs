@@ -92,7 +92,7 @@ namespace Gearbox.Core.Services
             };
             s_channel[queueName].Writer.TryWrite(message);
 
-            return Task.FromResult<SendReceipt?>(new SendReceipt(message.MessageId, message.InsertedOn, message.ExpiresOn, message.NextVisibleOn));
+            return Task.FromResult<SendReceipt?>(new SendReceipt(message.MessageId, message.InsertedOn, message.ExpiresOn, message.NextVisibleOn){IsSuccess = true});
         }
 
         public Task DeleteMessageAsync(QueueMessage message, string queueName = "", CancellationToken cancellationToken = default)

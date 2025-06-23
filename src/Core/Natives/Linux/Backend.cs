@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
@@ -92,6 +93,7 @@ namespace Gearbox.Core.Natives.Linux
                     _notificationService.Show(new Notification("Updated location", $"{Metadata.Product} has been re-registered with a new path."));
                     return true;
             }
+
             return false;
         }
 
@@ -109,6 +111,38 @@ namespace Gearbox.Core.Natives.Linux
                     Process.Start($"kcmshell{sv}", "kcm_componentchooser")
                         .WaitForExit(new TimeSpan(0, 0, 30));
                     break;
+            }
+        }
+
+        public void StartHost()
+        {
+            var background = Process.GetProcessesByName($"{Metadata.Product ?? "Gearbox"}.Host");
+            if (background.Length != 0)
+            {
+                return;
+            }
+
+            _logger.LogWarning("Host is not running.");
+            var hostPath = Path.Combine(AppContext.BaseDirectory, $"{Metadata.Product ?? "Gearbox"}.Host");
+            if (File.Exists(hostPath))
+            {
+                _logger.LogInformation("Starting host at {HostPath}", hostPath);
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = hostPath,
+                        UseShellExecute = true,
+                        RedirectStandardOutput = false,
+                        RedirectStandardError = false,
+                        CreateNoWindow = true,
+                    }
+                };
+                process.Start();
+            }
+            else
+            {
+                _logger.LogError("Host executable not found at {HostPath}", hostPath);
             }
         }
     }

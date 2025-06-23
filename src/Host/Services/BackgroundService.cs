@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Gearbox.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Gearbox.Runner.Services
+namespace Gearbox.Host.Services
 {
     public partial class BackgroundService : Microsoft.Extensions.Hosting.BackgroundService
     {
@@ -44,8 +44,8 @@ namespace Gearbox.Runner.Services
         {
             while (!stoppingToken.IsCancellationRequested && !s_cancellationTokenSource.IsCancellationRequested)
             {
-                var count = await _queueService.PeekMessagesAsync(Metadata.Product ?? "Gearbox");
-                var cmd = await _queueService.ReceiveMessageAsync(Metadata.Product ?? "Gearbox");
+                //var count = await _queueService.PeekMessagesAsync(Metadata.Product ?? "Gearbox", cancellationToken: stoppingToken);
+                var cmd = await _queueService.ReceiveMessageAsync(Metadata.Product ?? "Gearbox", cancellationToken: stoppingToken);
                 if (cmd != null && !string.IsNullOrWhiteSpace(cmd.MessageText))
                 {
                     var forceRegisterCommandMatch = RegisterCommandRegex().Match(cmd.MessageText);
@@ -54,14 +54,14 @@ namespace Gearbox.Runner.Services
                     if (forceRegisterCommandMatch.Success)
                     {
                         await _backend.RegisterAsync();
-                        await StopAsync(stoppingToken);
-                        await s_cancellationTokenSource.CancelAsync();
+                        //await StopAsync(stoppingToken);
+                        //await s_cancellationTokenSource.CancelAsync();
                     }
                     else if (forceUnregisterSourceCommandMatch.Success)
                     {
                         await _backend.UnregisterAsync();
-                        await StopAsync(stoppingToken);
-                        await s_cancellationTokenSource.CancelAsync();
+                        //await StopAsync(stoppingToken);
+                        //await s_cancellationTokenSource.CancelAsync();
                     }
                     else
                     {

@@ -2,11 +2,11 @@
 using System.Reflection;
 using Gearbox.Core.Interfaces;
 using Gearbox.Core.Services;
-using Gearbox.Runner.Services;
+using Gearbox.Host.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Gearbox.UnitTest.Runner
+namespace Gearbox.UnitTest.Host
 {
     [SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance")]
     public class BackgroundServiceTest

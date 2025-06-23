@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text;
@@ -103,6 +104,37 @@ namespace Gearbox.Core.Natives.Windows
         }
 
         public void OpenSettings() => Process.Start(new ProcessStartInfo { FileName = $"ms-settings:defaultapps?registeredAppUser={Metadata.Product}", UseShellExecute = true });
+        public void StartHost()
+        {
+            var background = Process.GetProcessesByName($"{Metadata.Product ?? "Gearbox"}.Host");
+            if (background.Length != 0)
+            {
+                return;
+            }
+
+            _logger.LogWarning("Host is not running.");
+            var hostPath = Path.Combine(AppContext.BaseDirectory, $"{Metadata.Product ?? "Gearbox"}.Host.exe");
+            if (File.Exists(hostPath))
+            {
+                _logger.LogInformation("Starting host at {HostPath}", hostPath);
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = hostPath,
+                        UseShellExecute = true,
+                        RedirectStandardOutput = false,
+                        RedirectStandardError = false,
+                        CreateNoWindow = true,
+                    }
+                };
+                process.Start();
+            }
+            else
+            {
+                _logger.LogError("Host executable not found at {HostPath}", hostPath);
+            }
+        }
 
         private string AppOpenUrlCommand => Metadata.Assembly?.Replace(".dll", ".exe") + " %1";
         private string AppKey => $"SOFTWARE\\{Metadata.Product}";

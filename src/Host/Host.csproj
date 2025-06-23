@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -7,10 +7,10 @@
     <LangVersion>default</LangVersion>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>false</Deterministic>
-    <RootNamespace>Gearbox.Runner</RootNamespace>
+    <RootNamespace>Gearbox.Host</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon>..\..\res\icons\gearbox.ico</ApplicationIcon>
-    <AssemblyName>Gearbox.Runner</AssemblyName>
+    <AssemblyName>Gearbox.Host</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -42,12 +42,10 @@
 
   <ItemGroup>
     <Content Include="..\..\res\icons\gearbox.ico">
-      <Link>Resources/gearbox.ico</Link>
-      <DependentUpon>gearbox.svg</DependentUpon>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>App.ico</Link>
     </Content>
   </ItemGroup>
-  
+
   <ItemGroup>
     <Content Include="..\Core\Config.ini">
       <Link>Config.ini</Link>
@@ -58,30 +56,5 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  
-  <ItemGroup>
-    <Content Include="..\..\res\icons\gearbox.icns">
-      <Link>Resources/gearbox.icns</Link>
-      <DependentUpon>gearbox.svg</DependentUpon>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\res\icons\gearbox.ico">
-      <Link>Resources/gearbox.ico</Link>
-      <DependentUpon>gearbox.svg</DependentUpon>
-    </Content>
-    <Content Include="..\..\res\icons\gearbox.png">
-      <Link>Resources/gearbox.png</Link>
-      <DependentUpon>gearbox.svg</DependentUpon>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\res\icons\gearbox.svg">
-      <Link>Resources/gearbox.svg</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\res\natives\linux\Gearbox.Desktop">
-      <Link>Natives/Linux/Gearbox.Desktop</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  
+
 </Project>

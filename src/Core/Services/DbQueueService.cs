@@ -137,6 +137,7 @@ namespace Gearbox.Core.Services
         {
             if (string.IsNullOrWhiteSpace(queueName)) { return null; }
 
+            bool success;
             var collection = await PrepareCollectionAsync(queueName);
 
             var message = new QueueMessage()
@@ -146,13 +147,15 @@ namespace Gearbox.Core.Services
             try
             {
                 await collection.InsertAsync(message);
+                success = true;
             }
             catch (Exception e)
             {
+                success = false;
                 _logger.LogError(e, "{Message}", e.Message);
             }
 
-            return await Task.FromResult(new SendReceipt(message.MessageId, message.InsertedOn, message.ExpiresOn, null));
+            return await Task.FromResult(new SendReceipt(message.MessageId, message.InsertedOn, message.ExpiresOn, null){ IsSuccess = success});
         }
 
         public async Task DeleteMessageAsync(QueueMessage? message, string queueName = "", CancellationToken cancellationToken = default)

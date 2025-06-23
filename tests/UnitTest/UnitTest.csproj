@@ -39,6 +39,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Core\Core.csproj"/>
     <ProjectReference Include="..\..\src\Runner\Runner.csproj"/>
+    <ProjectReference Include="..\..\src\Host\Host.csproj"/>
   </ItemGroup>
 
   <ItemGroup>

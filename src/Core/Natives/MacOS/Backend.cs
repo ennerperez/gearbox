@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
@@ -83,5 +85,36 @@ namespace Gearbox.Core.Natives.MacOS
         }
 
         public void OpenSettings() => Process.Start(new ProcessStartInfo { FileName = "x-apple.systempreferences:com.apple.Desktop-Settings.extension", UseShellExecute = true });
+        public void StartHost()
+        {
+            var background = Process.GetProcessesByName($"{Metadata.Product ?? "Gearbox"}.Host");
+            if (background.Length != 0)
+            {
+                return;
+            }
+
+            _logger.LogWarning("Host is not running.");
+            var hostPath = Path.Combine(AppContext.BaseDirectory, $"{Metadata.Product ?? "Gearbox"}.Host");
+            if (File.Exists(hostPath))
+            {
+                _logger.LogInformation("Starting host at {HostPath}", hostPath);
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = hostPath,
+                        UseShellExecute = true,
+                        RedirectStandardOutput = false,
+                        RedirectStandardError = false,
+                        CreateNoWindow = true,
+                    }
+                };
+                process.Start();
+            }
+            else
+            {
+                _logger.LogError("Host executable not found at {HostPath}", hostPath);
+            }
+        }
     }
 }
