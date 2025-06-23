@@ -1,4 +1,10 @@
 ﻿<Solution>
+  <Folder Name="/.build/">
+    <Project Path="build\_build.csproj">
+      <Configuration Solution="Debug|Any CPU" Project="Debug|Any CPU|NoBuild" />
+      <Configuration Solution="Release|Any CPU" Project="Release|Any CPU|NoBuild" />
+    </Project>
+  </Folder>
   <Folder Name="/.config/">
     <File Path=".config\dotnet-tools.json" />
   </Folder>
@@ -26,6 +32,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src\Core\Core.csproj" Type="Classic C#" />
+    <Project Path="src\Host\Host.csproj" Type="Classic C#" />
     <Project Path="src\Runner\Runner.csproj" Type="Classic C#">
       <Configuration Solution="Release|Any CPU" Project="Release|Any CPU|Deploy" />
     </Project>
