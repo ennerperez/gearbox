@@ -236,6 +236,27 @@ partial class Build : NukeBuild
                 });
         });
 
+    Target Analyze => d => d
+        .Before(Restore)
+        .Executes(() =>
+        {
+            var name = Solution.Name;
+            var lintFile = Path.Combine(RootDirectory, ".sonarlint", name + ".json");
+            if (File.Exists(lintFile))
+            {
+                var lint = System.Text.Json.JsonSerializer.Deserialize<SonarLint>(File.ReadAllText(lintFile));
+                DotNetTasks.DotNet(@$"sonarscanner begin /k:""{name}"" /d:sonar.host.url=""{lint.sonarQubeUri}"" /d:sonar.token=""{lint.sonarQubeToken}""");
+                DotNetTasks.DotNetBuild(s => s.SetProjectFile(Solution));
+                DotNetTasks.DotNet(@$"sonarscanner end /d:sonar.token=""{lint.sonarQubeToken}""");
+            }
+            else
+            {
+                Log.Warning("SonarQube Lint file not found: {LintFile}", lintFile);
+            }
+        });
+
+    record SonarLint(string sonarQubeUri, string sonarQubeToken, string projectKey);
+
     static DotNetVerbosity GetDotNetVerbosity()
     {
         return Verbosity switch

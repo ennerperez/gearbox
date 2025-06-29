@@ -7,17 +7,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".config", ".config", "{4A67
 		.config\dotnet-tools.json = .config\dotnet-tools.json
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{B5093614-984F-4031-89F7-0473074107FA}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.config = .nuget\NuGet.config
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".files", ".files", "{0A18FEAB-D5FC-4CED-836F-933F4EE37C13}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.editoricon.png = .editoricon.png
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		NuGet.config = NuGet.config
 		build.cmd = build.cmd
 		build.ps1 = build.ps1
 		build.sh = build.sh

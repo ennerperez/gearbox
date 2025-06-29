@@ -36,6 +36,12 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "commandLineArgs": "--target Coverage"
+    },
+    "SonarQube.Analyze": {
+      "description": "Execute the SonarQube code analysis",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Analyze"
     }
   }
 }
