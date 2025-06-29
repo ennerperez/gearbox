@@ -17,9 +17,9 @@ namespace Gearbox.Core.Services
         private readonly IBackend _backend;
         private readonly INotificationService _notificationService;
         private readonly IConfiguration _configuration;
-        private readonly ILogger<IBrowserService> _logger;
+        private readonly ILogger<BrowserService> _logger;
 
-        public BrowserService(INotificationService notificationService, IConfiguration configuration, IBackend backend, ILogger<IBrowserService> logger)
+        public BrowserService(INotificationService notificationService, IConfiguration configuration, IBackend backend, ILogger<BrowserService> logger)
         {
             _notificationService = notificationService;
             _configuration = configuration;
@@ -39,7 +39,7 @@ namespace Gearbox.Core.Services
                 var browsers = new Dictionary<string, Browser>();
                 _configuration.Bind("browsers", browsers);
 
-                _logger.LogInformation($"Attempting to launch \"{url}\"");
+                _logger.LogInformation("Attempting to launch \"{Url}\"", url);
 
                 var urlPreferences = new Dictionary<string, string>();
                 _configuration.Bind("urls", urlPreferences);
@@ -93,7 +93,7 @@ namespace Gearbox.Core.Services
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, $"Failed to launch \"{url}\" for \"{browser?.Name}\", {{Message}}", e.Message);
+                    _logger.LogError(e, "Failed to launch \"{Url}\" for \"{Browser}\", {Message}", url, browser?.Name, e.Message);
                 }
             }
             catch (Exception e)

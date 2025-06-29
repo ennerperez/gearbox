@@ -12,7 +12,6 @@ namespace Gearbox.UnitTest.Host
     public class BackgroundServiceTest
     {
         private readonly BackgroundService _backgroundService;
-        //private readonly QueueService _queueService;
         private readonly MemoryQueueService _queueService;
 
         public BackgroundServiceTest()
@@ -23,22 +22,9 @@ namespace Gearbox.UnitTest.Host
             var browserService = Substitute.For<IBrowserService>();
             var logger = Substitute.For<ILogger<BackgroundService>>();
 
-            //_queueService = new QueueService(new LiteDatabaseAsync($"{Guid.NewGuid()}.qdb") { UtcDate = true }, Substitute.For<ILogger<IQueueService>>());
             _queueService = new MemoryQueueService();
             _backgroundService = new BackgroundService(backend, browserService, _queueService, logger);
         }
 
-        // [Theory]
-        // [InlineData("--register")]
-        // [InlineData("--unregister")]
-        // [InlineData("https://google.com")]
-        // public async Task ExecuteAsync(string command)
-        // {
-        //     await _backgroundService.StartAsync(CancellationToken.None);
-        //     await _queueService.SendMessageAsync(Metadata.Product ?? "Test", command);
-        //     Thread.Sleep(3000);
-        //     await _backgroundService.StopAsync(CancellationToken.None);
-        //     Assert.True(true);
-        // }
     }
 }

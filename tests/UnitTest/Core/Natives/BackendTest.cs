@@ -24,7 +24,7 @@ namespace Gearbox.UnitTest.Core.Natives
             Assembly.GetEntryAssembly()?.ReadMetadata();
 
             var notificationService = Substitute.For<INotificationService>();
-            var logger = Substitute.For<ILogger<IBackend>>();
+            var logger = Substitute.For<ILogger<Backend>>();
 #pragma warning disable CA1416
             _backend = new Backend(notificationService, logger);
 #pragma warning restore CA1416

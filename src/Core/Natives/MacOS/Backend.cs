@@ -53,7 +53,7 @@ namespace Gearbox.Core.Natives.MacOS
 
             OpenSettings();
 
-            _logger.LogInformation($"Please set {Metadata.Product} as the default browser in Settings.");
+            _logger.LogInformation("Please set {Product} as the default browser in Settings.", Metadata.Product);
             _notificationService.Show(new Notification("Registered as a browser.", $"Please set {Metadata.Product} as the default browser in Settings."));
             return Task.FromResult(true);
         }

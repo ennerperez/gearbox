@@ -20,7 +20,6 @@ namespace Gearbox.UnitTest.Core.Models
             model.Name.ShouldNotBeEmpty();
             model.Args.ShouldNotBeEmpty();
             model.Icon.ShouldNotBeEmpty();
-            //model.IsInstalled.ShouldBeTrue();
             model.ShouldNotBeNull();
         }
 

@@ -29,13 +29,14 @@ namespace Gearbox.UnitTest.Core.Services
 
             var notificationService = Substitute.For<INotificationService>();
             var backend = Substitute.For<IBackend>();
-            var logger = Substitute.For<ILogger<IBrowserService>>();
+            var logger = Substitute.For<ILogger<BrowserService>>();
             _browserService = new BrowserService(notificationService, configuration, backend, logger);
         }
 
         [Theory]
         [InlineData("https://google.com")]
         [InlineData("https://youtube.com")]
+        [InlineData("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")]
         public async Task LaunchUrlByBrowserAsync(string url)
         {
             var processId = await _browserService.LaunchAsync(url);
@@ -51,12 +52,5 @@ namespace Gearbox.UnitTest.Core.Services
             processId.ShouldBeGreaterThan(0);
         }
 
-        [Theory]
-        [InlineData("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")]
-        public async Task LaunchUrlByTypeAsync(string url)
-        {
-            var processId = await _browserService.LaunchAsync(url);
-            processId.ShouldBeGreaterThan(0);
-        }
     }
 }

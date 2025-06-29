@@ -19,7 +19,7 @@ namespace Gearbox.Core.Natives.Linux
         private readonly INotificationService _notificationService;
         private readonly ILogger<IBackend> _logger;
 
-        public Backend(INotificationService notificationService, ILogger<IBackend> logger)
+        public Backend(INotificationService notificationService, ILogger<Backend> logger)
         {
             _notificationService = notificationService;
             _logger = logger;
@@ -44,7 +44,7 @@ namespace Gearbox.Core.Natives.Linux
             HandleUrls($"{Metadata.Product}.desktop");
             OpenSettings();
 
-            _logger.LogInformation($"Please set {Metadata.Product} as the default browser in Settings.");
+            _logger.LogInformation("Please set {Product} as the default browser in Settings.", Metadata.Product);
             _notificationService.Show(new Notification("Registered as a browser.", $"Please set {Metadata.Product} as the default browser in Settings."));
             return Task.FromResult(true);
         }
@@ -99,7 +99,6 @@ namespace Gearbox.Core.Natives.Linux
 
         public void OpenSettings()
         {
-            //TODO: Open Default App Settings
             switch (Xdg.CurrentDesktop())
             {
                 case Xdg.GNOME_DESKTOP:
