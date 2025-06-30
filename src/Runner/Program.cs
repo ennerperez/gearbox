@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
@@ -31,10 +32,10 @@ namespace Gearbox.Runner
 
             var builder = BuildRunnerApp(args);
             var host = builder.Build();
-            var backend = host.Services.GetService<IBackend>();
             var logger = host.Services.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
+            var backend = host.Services.GetService<IBackend>();
             backend?.StartHost();
-
+            
             var queueService = host.Services.GetService<IQueueService>();
             var result = await queueService?.SendMessageAsync(Metadata.Product ?? "Gearbox", string.Join(" ", args), CancellationToken.None)!;
             if (result == null || !result.IsSuccess)
@@ -43,7 +44,6 @@ namespace Gearbox.Runner
             }
 
             Environment.Exit(1);
-            return;
         }
 
         private static HostApplicationBuilder BuildRunnerApp(string[] args)
@@ -69,7 +69,7 @@ namespace Gearbox.Runner
             builder.Services
                 .AddInfrastructure()
                 .AddPersistence()
-                //.AddCore()
+                .AddCore().WithBackend()
                 .AddRunner();
 
             return builder;

@@ -25,6 +25,7 @@ namespace Gearbox.UnitTest.Core.Natives
         public BackendTest()
         {
             Assembly.GetEntryAssembly()?.ReadMetadata();
+            Metadata.Product = "Gearbox";
 
             var notificationService = Substitute.For<INotificationService>();
             var logger = Substitute.For<ILogger<Backend>>();
@@ -57,6 +58,20 @@ namespace Gearbox.UnitTest.Core.Natives
 #elif WINDOWS
             processName = "ms-settings:";
 #endif
+            var process = Process.GetProcessesByName(processName);
+            process.Length.ShouldBeGreaterThan(0);
+        }
+
+        [Fact]
+        private async Task Should_Start_Host()
+        {
+            var t1 = new Thread(() =>
+            {
+                _backend.StartHost();
+            });
+            t1.Start();
+            await Task.Delay(3000);
+            var processName = $"{Metadata.Product ?? "Gearbox"}.Host";
             var process = Process.GetProcessesByName(processName);
             process.Length.ShouldBeGreaterThan(0);
         }

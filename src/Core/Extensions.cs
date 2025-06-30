@@ -42,6 +42,12 @@ namespace Gearbox.Core
 
         public static IServiceCollection AddCore(this IServiceCollection serviceCollection)
         {
+            serviceCollection.AddSingleton<IBrowserService, BrowserService>();
+            return serviceCollection;
+        }
+        
+        public static IServiceCollection WithBackend(this IServiceCollection serviceCollection)
+        {
             if (OperatingSystem.IsWindows())
             {
                 serviceCollection.AddSingleton<IBackend, Natives.Windows.Backend>();
@@ -55,7 +61,6 @@ namespace Gearbox.Core
                 serviceCollection.AddSingleton<IBackend, Natives.Linux.Backend>();
             }
 
-            serviceCollection.AddSingleton<IBrowserService, BrowserService>();
             return serviceCollection;
         }
     }

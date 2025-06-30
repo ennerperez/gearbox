@@ -122,7 +122,7 @@ namespace Gearbox.Host
             builder.Services
                 .AddInfrastructure()
                 .AddPersistence()
-                .AddCore()
+                .AddCore().WithBackend()
                 .AddHost();
 
             builder.Services.AddHostedService<BackgroundService>();

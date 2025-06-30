@@ -129,7 +129,7 @@ namespace System.Reflection
     {
         #region Metadata
 
-        public static string? Product { get; private set; }
+        public static string? Product { get; internal set; }
         public static string? DisplayVersion { get; private set; }
         public static Version? Version { get; private set; }
         public static string? Commit { get; private set; }
