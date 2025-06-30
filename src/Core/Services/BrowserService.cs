@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Gearbox.Core.Exceptions;
 using Gearbox.Core.Interfaces;
 using Gearbox.Core.Models;
 using Microsoft.Extensions.Configuration;
@@ -75,14 +76,19 @@ namespace Gearbox.Core.Services
                 {
                     if (string.IsNullOrWhiteSpace(value))
                     {
-                        throw new ApplicationException("Browser cannot be launched without a value.");
+                        throw new BrowserException("Browser cannot be launched without a value.");
                     }
 
                     browser = browsers[value];
 
                     if (string.IsNullOrWhiteSpace(browser.Path))
                     {
-                        throw new ApplicationException("Browser path cannot be launched without a value.");
+                        throw new BrowserException("Browser path cannot be launched without a value.", browser);
+                    }
+
+                    if (!browser.IsInstalled)
+                    {
+                        throw new BrowserException("Browser is not installed.", browser);
                     }
 
                     var process = PrepareNativeProcess(browser, url);

@@ -37,7 +37,7 @@ namespace Gearbox.Runner
 
             var queueService = host.Services.GetService<IQueueService>();
             var result = await queueService?.SendMessageAsync(Metadata.Product ?? "Gearbox", string.Join(" ", args), CancellationToken.None)!;
-            if (result == null || result.IsSuccess == false)
+            if (result == null || !result.IsSuccess)
             {
                 logger?.LogError("Failed to send message to the queue.");
             }
