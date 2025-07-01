@@ -2,47 +2,65 @@ name: Build
 
 on:
   push:
-    branches:
-      - master
-      - develop
-
+    tags:
+      - 'v*'
+  workflow_dispatch:
 jobs:
   build:
-    name: Build and analyze
-    runs-on: windows-latest
-    
+    name: Build
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+          submodules: recursive
+          fetch-depth: 3
+      - name: Permissions
+        run: chmod +x build.sh
+      - name: Pack
+        run: ./build.sh --target Pack
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Migrations
+        uses: actions/upload-artifact@v3
         with:
-          java-version: 17
-          distribution: 'zulu' # Alternative distribution options are available.
-      - name: Cache SonarQube packages
-        uses: actions/cache@v4
+          name: migrations
+          path: |
+            output/Scripts/*.sql
+          if-no-files-found: warn
+      - name: Packages
+        uses: actions/upload-artifact@v3
         with:
-          path: ~\.sonar\cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Cache SonarQube scanner
-        id: cache-sonar-scanner
-        uses: actions/cache@v4
+          name: packages
+          path: |
+            output/*.nupkg
+          if-no-files-found: warn
+      - name: Artifacts
+        uses: actions/upload-artifact@v3
         with:
-          path: .\.sonar\scanner
-          key: ${{ runner.os }}-sonar-scanner
-          restore-keys: ${{ runner.os }}-sonar-scanner
-      - name: Install SonarQube scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          New-Item -Path .\.sonar\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
-      - name: Build and analyze
-        shell: powershell
-        run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"gearbox" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }} /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml"
-          dotnet build
-          dotnet dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          name: artifacts
+          path: |
+            output/*.zip
+          if-no-files-found: warn
+  publish:
+    name: Publish
+    needs: build
+    environment:
+      name: 'Production'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts
+
+      - name: Release
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          draft: false
+          prerelease: false
+          artifacts: |
+            *.nupkg
+            *.zip
