@@ -245,7 +245,7 @@ partial class Build : NukeBuild
             if (File.Exists(lintFile))
             {
                 var lint = System.Text.Json.JsonSerializer.Deserialize<SonarLint>(File.ReadAllText(lintFile));
-                DotNetTasks.DotNet(@$"sonarscanner begin /k:""{name}"" /d:sonar.host.url=""{lint.sonarQubeUri}"" /d:sonar.token=""{lint.sonarQubeToken}"" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml");
+                DotNetTasks.DotNet(@$"sonarscanner begin /k:""{lint.projectKey}"" /d:sonar.host.url=""{lint.sonarQubeUri}"" /d:sonar.token=""{lint.sonarQubeToken}"" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml");
                 DotNetTasks.DotNetBuild(s => s.SetProjectFile(Solution));
                 Process.Start("dotnet", "dotnet-coverage collect \"dotnet test\" -f xml -o \"coverage.xml\"")?.WaitForExit();
                 DotNetTasks.DotNet(@$"sonarscanner end /d:sonar.token=""{lint.sonarQubeToken}""");

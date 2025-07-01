@@ -42,7 +42,7 @@ jobs:
       - name: Build and analyze
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"Gearbox" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }} /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"gearbox" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }} /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml"
           dotnet build
           dotnet dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
