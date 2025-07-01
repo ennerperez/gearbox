@@ -158,7 +158,7 @@ partial class Build : NukeBuild
                 .SetWarningLevel(WarningLevel)
                 .SetVerbosity(GetDotNetVerbosity())
                 .SetPlatform(Platform)
-                .SetConfigFile(RootDirectory / ".nuget" / "NuGet.config")
+                .SetConfigFile(RootDirectory / "NuGet.config")
                 .CombineWith(Solution.AllProjects, (x, v) => x
                     .SetProjectFile(v)));
         });
@@ -237,7 +237,8 @@ partial class Build : NukeBuild
         });
 
     Target Analyze => d => d
-        .Before(Restore)
+        .DependsOn(Restore)
+        .After(Restore)
         .Executes(() =>
         {
             var lintFile = Path.Combine(RootDirectory, ".sonarlint", Solution.Name + ".json");
@@ -249,9 +250,9 @@ partial class Build : NukeBuild
             else
             {
                 lint = new SonarLint(
-                    System.Environment.GetEnvironmentVariable("SONAR_PROJECT_KEY"),
                     System.Environment.GetEnvironmentVariable("SONAR_HOST_URL"),
-                    System.Environment.GetEnvironmentVariable("SONAR_TOKEN")
+                    System.Environment.GetEnvironmentVariable("SONAR_TOKEN"),
+                    System.Environment.GetEnvironmentVariable("SONAR_PROJECT_KEY")
                 );
             }
 

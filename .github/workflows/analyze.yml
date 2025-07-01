@@ -19,7 +19,7 @@ jobs:
       - name: Permissions
         run: chmod +x build.sh
       - name: Analyze
-        run: ./build.sh --target Analyze
+        run: ./build.sh --target Analyze --no-logo
         env:
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }} 
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
