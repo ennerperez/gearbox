@@ -1,0 +1,30 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <Color x:Key="Color.Window">#FFF0F5F9</Color>
+            <Color x:Key="Color.WindowBorder">#00000000</Color>
+            <Color x:Key="Color.TitleBar">#FFCFDEEA</Color>
+            <SolidColorBrush x:Key="Brush.Border0" Color="{DynamicResource Color.Border0}"/>
+            <SolidColorBrush x:Key="Brush.Border1" Color="{DynamicResource Color.Border1}"/>
+            <SolidColorBrush x:Key="Brush.Border2" Color="{DynamicResource Color.Border2}"/>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <Color x:Key="Color.Window">#FF252525</Color>
+            <Color x:Key="Color.WindowBorder">#FF444444</Color>
+            <Color x:Key="Color.TitleBar">#FF1F1F1F</Color>
+            <Color x:Key="Color.ToolBar">#FF2C2C2C</Color>
+            <Color x:Key="Color.Border0">#FFCFCFCF</Color>
+            <Color x:Key="Color.Border1">#FF898989</Color>
+            <Color x:Key="Color.Border2">#FFCFCFCF</Color>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+    <SolidColorBrush x:Key="Brush.Window" Color="{DynamicResource Color.Window}"/>
+    <SolidColorBrush x:Key="Brush.WindowBorder" Color="{DynamicResource Color.WindowBorder}"/>
+    <SolidColorBrush x:Key="Brush.TitleBar" Color="{DynamicResource Color.TitleBar}"/>
+    <SolidColorBrush x:Key="Brush.ToolBar" Color="{DynamicResource Color.ToolBar}"/>
+    <SolidColorBrush x:Key="Brush.Border0" Color="{DynamicResource Color.Border0}"/>
+    <SolidColorBrush x:Key="Brush.Border1" Color="{DynamicResource Color.Border1}"/>
+    <SolidColorBrush x:Key="Brush.Border2" Color="{DynamicResource Color.Border2}"/>
+</ResourceDictionary>
+

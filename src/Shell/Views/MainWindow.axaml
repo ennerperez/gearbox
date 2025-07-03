@@ -1,0 +1,80 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Gearbox.Shell.ViewModels"
+    xmlns:interfaces="clr-namespace:Gearbox.Core.Interfaces;assembly=Gearbox.Core"
+    mc:Ignorable="d"
+    x:Class="Gearbox.Shell.Views.MainWindow"
+    x:DataType="vm:MainWindowViewModel"
+    d:DesignWidth="584"
+    d:DesignHeight="200"
+    x:Name="This"
+    Width="584"
+    Height="200"
+    Icon="/App.ico"
+    Title="Gearbox">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Border Classes="Container" CornerRadius="20">
+        <Grid RowDefinitions="32,*" RowSpacing="16">
+            <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+                <Border Grid.Column="0" Grid.ColumnSpan="3" CornerRadius="20,20,0,0" Background="{DynamicResource Brush.TitleBar}" />
+                <Button Grid.Column="0" CornerRadius="32" Width="32" Height="32" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip.Tip="Menu" >
+                    <Button.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedLeft" VerticalOffset="-8" HorizontalOffset="8">
+                            <MenuItem Header="Settings" Command="{Binding SettingsCommand}" />
+                            <MenuItem Header="-" />
+                            <MenuItem Header="About" Command="{Binding AboutCommand}" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                    <Image Width="16" Height="16" Stretch="Uniform">
+                        <Image.Source>
+                            <SvgImage Source="/Assets/Icons/menu-burger.svg" Css="path { fill: #fff; }" />
+                        </Image.Source>
+                    </Image>
+                </Button>
+                <TextBox Grid.Column="1" Margin="8" Text="{Binding Url}" IsEnabled="False" />
+                <Button Grid.Column="2" CornerRadius="32" Width="32" Height="32" VerticalAlignment="Center" Margin="0,0,8,0" Command="{Binding ExitCommand}"  ToolTip.Tip="Exit">
+                    <Image Width="16" Height="16" Stretch="Uniform">
+                        <Image.Source>
+                            <SvgImage Source="/Assets/Icons/close-x.svg" Css="path { fill: #fff; }" />
+                        </Image.Source>
+                    </Image>
+                </Button>
+            </Grid>
+            <Grid Grid.Row="1" ColumnDefinitions="*">
+                <ScrollViewer
+                    VerticalScrollBarVisibility="Disabled"
+                    HorizontalScrollBarVisibility="Auto">
+                    <ItemsControl Margin="10" ItemsSource="{Binding Browsers}">
+                        
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Vertical" HorizontalAlignment="Stretch" ItemsAlignment="Center" ItemSpacing="16"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="interfaces:IBrowser">
+                                <Button Margin="0,0,16,0" CornerRadius="8" Width="128" Height="128" VerticalAlignment="Center" ToolTip.Tip="{Binding Name}">
+                                    <StackPanel Orientation="Vertical">
+                                        <Svg Width="64" Margin="16" Path="{Binding Icon}"  Stretch="Uniform" />
+                                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Stretch" Background="Red" />
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Border>
+
+</Window>

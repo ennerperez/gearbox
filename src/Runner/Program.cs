@@ -71,7 +71,7 @@ namespace Gearbox.Runner
                 .AddPersistence()
                 .AddCore().WithBackend()
                 .AddRunner();
-
+            
             return builder;
         }
     }

@@ -1,0 +1,101 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <Deterministic>false</Deterministic>
+        <RootNamespace>Gearbox.Shell</RootNamespace>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <ApplicationIcon>App.ico</ApplicationIcon>
+        <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+        <Product>Gearbox</Product>
+        <Description>Gearbox Browser Launcher</Description>
+        <Company>Enner Pérez</Company>
+        <Copyright>Copyright © $([System.DateTime]::Now.Year)</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/ennerperez/gearbox/gearbox.git</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/gearbox/gearbox.git</RepositoryUrl>
+        <RepositoryType>Public</RepositoryType>
+        <AssemblyName>Gearbox</AssemblyName>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release' and '$(DisableAOT)' != 'true'">
+        <PublishAot>true</PublishAot>
+        <PublishTrimmed>true</PublishTrimmed>
+        <TrimMode>link</TrimMode>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AvaloniaResource Include="App.ico" />
+        <AvaloniaResource Include="Assets\**"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="..\Core\Config.ini">
+            <Link>Config.ini</Link>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+        <Content Condition="'$(Configuration)' != 'Release'" Include="..\Core\Config.*.ini">
+            <DependentUpon>Config.ini</DependentUpon>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.6" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.6" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.6" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.6" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="9.0.6" />
+        <PackageReference Include="Avalonia" Version="11.3.2"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.3.2"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.2"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.2"/>
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.3.2" Condition="'$(Configuration)' == 'Debug'">
+            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
+        <PackageReference Include="ShimSkiaSharp" Version="3.0.3" />
+        <PackageReference Include="Skia.Controls.Avalonia" Version="11.3.0.1" />
+        <PackageReference Include="SkiaSharp" Version="3.119.0" />
+        <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.119.0" />
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.0" />
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.0" />
+        <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.0" />
+        <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly" Version="3.119.0" />
+        <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.0" />
+        <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="11.3.0.1" />
+    </ItemGroup>
+
+    <ItemGroup Label="Serilog" Condition="'$(Configuration)' == 'Debug'">
+        <PackageReference Include="Serilog" Version="4.3.0" />
+        <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0"/>
+        <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+        <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="5.0.0"/>
+        <PackageReference Include="Serilog.Sinks.Trace" Version="4.0.0"/>
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
+        <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0"/>
+        <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <TrimmerRootAssembly Include="Avalonia.Themes.Fluent"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+        <LinkerArg Include="-mmacosx-version-min=11.0" Condition="'$(Configuration)' == 'Release'"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Core\Core.csproj" />
+    </ItemGroup>
+</Project>

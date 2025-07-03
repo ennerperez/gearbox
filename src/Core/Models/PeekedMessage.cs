@@ -12,11 +12,11 @@ namespace Gearbox.Core.Models
         }
         public PeekedMessage(string messageId, byte[] body, DateTimeOffset? insertedOn = null, DateTimeOffset? expiresOn = null, long dequeueCount = 0) : this()
         {
-            this.MessageId = messageId;
-            this.Body = body;
-            this.InsertedOn = insertedOn;
-            this.ExpiresOn = expiresOn;
-            this.DequeueCount = dequeueCount;
+            MessageId = messageId;
+            Body = body;
+            InsertedOn = insertedOn;
+            ExpiresOn = expiresOn;
+            DequeueCount = dequeueCount;
         }
 
         /// <summary>

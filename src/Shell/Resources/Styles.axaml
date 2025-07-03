@@ -1,0 +1,29 @@
+<Styles xmlns="https://github.com/avaloniaui" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style Selector="ScrollBar">
+        <Style.Resources>
+            <x:Double x:Key="ScrollBarSize">12</x:Double>
+        </Style.Resources>
+
+        <Setter Property="ShowDelay" Value="0:0:0.1"/>
+        <Setter Property="HideDelay" Value="0:0:0.2"/>
+    </Style>
+    <Style Selector="Window">
+        <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
+        <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
+        <Setter Property="ExtendClientAreaTitleBarHeightHint" Value="-1" />
+        <Setter Property="SystemDecorations" Value="None" />
+        <Setter Property="TransparencyLevelHint" Value="Transparent" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Border.Container">
+        <Setter Property="Background" Value="{DynamicResource Brush.Window}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+    <Style Selector="Button.IconButton, RepeatButton.IconButton">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+</Styles>

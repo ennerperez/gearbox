@@ -39,12 +39,12 @@ namespace Gearbox.Core.Natives.MacOS
                 windowList.Add(item);
             }
 #endif
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public RegisterStatus GetRegisterStatus()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task<bool> RegisterAsync()
@@ -60,7 +60,7 @@ namespace Gearbox.Core.Natives.MacOS
 
         public Task<bool> UnregisterAsync()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public async Task<bool> RegisterOrUnregisterAsync()

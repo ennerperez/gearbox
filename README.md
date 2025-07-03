@@ -52,7 +52,8 @@ No more documentation required for now.
 
 ### License
 
-Code released under [License](LICENSE)
+- Code released under [License](LICENSE)
+- Vectors and icons by [Arthur Kazais](https://www.figma.com/@thearthurk?ref=svgrepo.com) in PD License via [SVG Repo](ttps://www.svgrepo.com/)
 
 ## Contributing
 

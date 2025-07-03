@@ -15,7 +15,7 @@ namespace Gearbox.Core.Models
         /// <summary>
         /// The time that the message will again become visible in the Queue.
         /// </summary>
-        public System.DateTimeOffset? NextVisibleOn { get; internal set; }
+        public DateTimeOffset? NextVisibleOn { get; internal set; }
 
         internal static PeekedMessage ToPeekedMessage(QueueMessage message)
         {
