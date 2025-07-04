@@ -1,3 +1,4 @@
+#define USING_SONARQUBE
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
