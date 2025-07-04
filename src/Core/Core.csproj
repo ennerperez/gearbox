@@ -20,6 +20,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.6" />
     <PackageReference Include="MonoMac.Core" Version="0.0.23728"/>
+    <PackageReference Include="ProcessX" Version="1.5.6" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,7 +28,7 @@
       <Link>Config.ini</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Condition="'$(Configuration)' != 'Release'" Include="Config.*.ini">
+    <Content Include="Config.*.ini">
       <DependentUpon>Config.ini</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

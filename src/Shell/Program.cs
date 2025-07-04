@@ -2,31 +2,28 @@
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
+using Gearbox.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Serilog;
 using OS = System.Runtime.OperatingSystemExtensions;
-#if DEBUG
-
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-
-#else
-#endif
+using Serilog;
 
 namespace Gearbox.Shell
 {
-    sealed class Program
+    internal sealed class Program
     {
         internal static IServiceProvider? Services { get; set; }
-        internal static IConfiguration? Configuration { get; set; }
+        internal static IConfiguration? Configuration { get; private set; }
+        internal static AppBuilder? Builder { get; private set; }
 
         // Initialization code. Don't use any Avalonia, third-party APIs or any
         // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
         // yet and stuff might break.
         [STAThread]
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             Assembly.GetEntryAssembly()?.ReadMetadata();
 
@@ -36,7 +33,7 @@ namespace Gearbox.Shell
                 Environment.Exit(1);
                 return;
             }
-            
+
             var assemblyPath = Path.GetDirectoryName(AppContext.BaseDirectory);
             Configuration = new ConfigurationBuilder()
                 .SetBasePath(assemblyPath ?? Directory.GetCurrentDirectory())
@@ -46,7 +43,6 @@ namespace Gearbox.Shell
                 .AddCommandLine(args)
                 .Build();
 
-#if DEBUG
             // Initialize Logger
             var loggerConfiguration = new LoggerConfiguration()
                 .WriteTo.Async(a =>
@@ -71,7 +67,6 @@ namespace Gearbox.Shell
             Log.Logger = loggerConfiguration
                 .WriteTo.Trace()
                 .CreateLogger();
-#endif
 
             System.Runtime.Exceptions.UnhandledException += (_, e) =>
             {
@@ -80,8 +75,35 @@ namespace Gearbox.Shell
                 logger?.LogCritical(ex, "{Message}", ex?.Message);
             };
 
-            BuildAvaloniaApp()
-                .StartWithClassicDesktopLifetime(args);
+            var services = new ServiceCollection();
+
+            services.AddSingleton(Configuration);
+            services.AddLogging(c => c.AddSerilog(Log.Logger, true));
+
+            services
+                .AddInfrastructure()
+                .AddPersistence()
+                .AddCore().WithBackend();
+
+            services
+                .RegisterServices()
+                .RegisterViews()
+                .RegisterViewsModels();
+
+            Services = services.BuildServiceProvider();
+
+            Builder = BuildAvaloniaApp()
+                .WithDesktopNotifications();
+
+            if (Builder != null)
+            {
+                if (args.Length != 0)
+                {
+                    await Builder.StartWithOpenerLifetime(args);
+                }
+
+                Builder.StartWithClassicDesktopLifetime(args);
+            }
 
             GC.KeepAlive(mutex);
         }
@@ -96,5 +118,6 @@ namespace Gearbox.Shell
                 .WithInterFont()
                 .LogToTrace();
         }
+
     }
 }

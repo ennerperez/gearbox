@@ -2,7 +2,7 @@
 {
     public enum NotificationType : short
     {
-        Information = 1,
+        Information = 0,
         Success,
         Warning,
         Error

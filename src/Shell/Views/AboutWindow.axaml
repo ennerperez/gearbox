@@ -1,0 +1,49 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Gearbox.Shell.ViewModels"
+    mc:Ignorable="d"
+    x:Class="Gearbox.Shell.Views.AboutWindow"
+    x:DataType="vm:AboutWindowViewModel"
+    d:DesignWidth="320"
+    d:DesignHeight="240"
+    x:Name="This"
+    Width="320"
+    Height="240"
+    Icon="/App.ico"
+    IsVisible="{Binding IsVisible}"
+    Title="Gearbox">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:AboutWindowViewModel />
+    </Design.DataContext>
+
+    <Border Classes="Container" CornerRadius="20">
+        <Grid RowDefinitions="48,*" RowSpacing="16">
+            <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+                <Border Grid.Column="0" Grid.ColumnSpan="3" CornerRadius="20,20,0,0" Background="{DynamicResource Brush.TitleBar}" />
+                <Button Grid.Column="2" CornerRadius="32" Width="32" Height="32" VerticalAlignment="Center" Margin="0,0,8,0" Command="{Binding ExitCommand}" ToolTip.Tip="Exit">
+                    <Image Width="16" Height="16" Stretch="Uniform">
+                        <Image.Source>
+                            <SvgImage Source="/Assets/Icons/close-x.svg" Css="path { fill: #fff; }" />
+                        </Image.Source>
+                    </Image>
+                </Button>
+            </Grid>
+            <Grid Grid.Row="1" ColumnDefinitions="*">
+                <StackPanel Margin="10" Orientation="Vertical">
+                    <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" />
+                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Version}" FontStyle="Italic" />
+                    <TextBlock Text="{Binding Copyright}" />
+                    <TextBlock Text="{Binding License}" />
+                    <Button Command="{Binding OpenWebsiteCommand}" Content="Visit Website" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

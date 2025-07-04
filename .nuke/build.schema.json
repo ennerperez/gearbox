@@ -29,6 +29,7 @@
         "Compile",
         "Coverage",
         "Prepare",
+        "Publish",
         "Restore",
         "Test"
       ]

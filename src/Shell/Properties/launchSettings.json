@@ -1,8 +1,48 @@
 {
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "Development": {
+    "open_switcher": {
       "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "open_url_google": {
+      "commandName": "Project",
+      "commandLineArgs": "https://www.google.com/",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "open_url_youtube": {
+      "commandName": "Project",
+      "commandLineArgs": "https://www.youtube.com/",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "open_type_pdf": {
+      "commandName": "Project",
+      "commandLineArgs": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "open_source_teams": {
+      "commandName": "Project",
+      "commandLineArgs": "https://github.com/ -fS \"Microsoft Teams\"",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "open_source_discord": {
+      "commandName": "Project",
+      "commandLineArgs": "https://github.com/ -fS Discord",
+      "dotnetRunMessages": true,
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }

@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Gearbox.Core.Models;
+﻿using Gearbox.Core.Models;
 using Shouldly;
 
 namespace Gearbox.UnitTest.Core.Models

@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
-    <SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
+    <SolutionDir>/mnt/d/Sources/Repos/gearbox</SolutionDir>
     <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">WINDOWS</DefineConstants>
     <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">OSX</DefineConstants>
     <DefineConstants Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">LINUX</DefineConstants>

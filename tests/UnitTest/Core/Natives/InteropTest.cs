@@ -1,8 +1,4 @@
-﻿using System.Runtime.Versioning;
-using Gearbox.Core.Natives.Linux.Interop;
-using Shouldly;
-
-namespace Gearbox.UnitTest.Core.Natives
+﻿namespace Gearbox.UnitTest.Core.Natives
 {
     public class InteropTest
     {

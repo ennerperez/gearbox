@@ -21,7 +21,7 @@ namespace Gearbox.UnitTest.Host
         [Fact]
         public async Task ShowNotificationAsync()
         {
-            _notificationService.Show(new Notification()
+            await _notificationService.ShowAsync(new Notification()
             {
                 Message = "Hello World!",
                 Expiration = DateTime.Now.AddSeconds(7).TimeOfDay,

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
@@ -12,13 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OS = System.Runtime.OperatingSystemExtensions;
-#if DEBUG
 using Serilog;
-
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-
-#else
-#endif
 
 namespace Gearbox.Runner
 {
@@ -35,7 +28,7 @@ namespace Gearbox.Runner
             var logger = host.Services.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
             var backend = host.Services.GetService<IBackend>();
             backend?.StartHost();
-            
+
             var queueService = host.Services.GetService<IQueueService>();
             var result = await queueService?.SendMessageAsync(Metadata.Product ?? "Gearbox", string.Join(" ", args), CancellationToken.None)!;
             if (result == null || !result.IsSuccess)
@@ -43,7 +36,7 @@ namespace Gearbox.Runner
                 logger?.LogError("Failed to send message to the queue.");
             }
 
-            Environment.Exit(1);
+            Environment.Exit(0);
         }
 
         private static HostApplicationBuilder BuildRunnerApp(string[] args)
@@ -61,9 +54,7 @@ namespace Gearbox.Runner
 
             // Register all the services needed for the application to run
             builder.Services.AddSingleton(configuration);
-#if DEBUG
             builder.Services.AddLogging(c => c.AddSerilog(Log.Logger, true));
-#endif
 
             // Core Services
             builder.Services
@@ -71,7 +62,7 @@ namespace Gearbox.Runner
                 .AddPersistence()
                 .AddCore().WithBackend()
                 .AddRunner();
-            
+
             return builder;
         }
     }

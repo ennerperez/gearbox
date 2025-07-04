@@ -5,20 +5,42 @@
             <Color x:Key="Color.Window">#FFF0F5F9</Color>
             <Color x:Key="Color.WindowBorder">#00000000</Color>
             <Color x:Key="Color.TitleBar">#FFCFDEEA</Color>
-            <SolidColorBrush x:Key="Brush.Border0" Color="{DynamicResource Color.Border0}"/>
-            <SolidColorBrush x:Key="Brush.Border1" Color="{DynamicResource Color.Border1}"/>
-            <SolidColorBrush x:Key="Brush.Border2" Color="{DynamicResource Color.Border2}"/>
+            <Color x:Key="Color.Danger">#80FF9797</Color>
+            <Color x:Key="Color.Border0">#FFCFCFCF</Color>
+            <Color x:Key="Color.Border1">#FF898989</Color>
+            <Color x:Key="Color.Border2">#FFCFCFCF</Color>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <Color x:Key="Color.Window">#FF252525</Color>
             <Color x:Key="Color.WindowBorder">#FF444444</Color>
             <Color x:Key="Color.TitleBar">#FF1F1F1F</Color>
             <Color x:Key="Color.ToolBar">#FF2C2C2C</Color>
+            <Color x:Key="Color.Danger">#80FF9797</Color>
             <Color x:Key="Color.Border0">#FFCFCFCF</Color>
             <Color x:Key="Color.Border1">#FF898989</Color>
             <Color x:Key="Color.Border2">#FFCFCFCF</Color>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
+    
+    <!-- Colors -->
+    <SolidColorBrush x:Key="Primary">#0d6efd</SolidColorBrush>
+    <SolidColorBrush x:Key="Secondary">#6c757d</SolidColorBrush>
+    <SolidColorBrush x:Key="Success">#198754</SolidColorBrush>
+    <SolidColorBrush x:Key="Info">#0dcaf0</SolidColorBrush>
+    <SolidColorBrush x:Key="Warning">#ffc107</SolidColorBrush>
+    <SolidColorBrush x:Key="Danger">#dc3545</SolidColorBrush>
+    <SolidColorBrush x:Key="Light">#f8f9fa</SolidColorBrush>
+    <SolidColorBrush x:Key="Dark">#212529</SolidColorBrush>
+    <SolidColorBrush x:Key="Muted">#6c757d</SolidColorBrush>
+    <SolidColorBrush x:Key="White">#fff</SolidColorBrush>
+    <SolidColorBrush x:Key="Black">#000</SolidColorBrush>
+        
+    <SolidColorBrush x:Key="Accent">#63B78F</SolidColorBrush>
+    <SolidColorBrush x:Key="Background">WhiteSmoke</SolidColorBrush>
+
+    <!-- Theme -->
+    <Color x:Key="Tint">#212529</Color>
+    
     <SolidColorBrush x:Key="Brush.Window" Color="{DynamicResource Color.Window}"/>
     <SolidColorBrush x:Key="Brush.WindowBorder" Color="{DynamicResource Color.WindowBorder}"/>
     <SolidColorBrush x:Key="Brush.TitleBar" Color="{DynamicResource Color.TitleBar}"/>

@@ -1,44 +1,78 @@
 {
-  "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "Build.Prepare": {
-      "description": "Prepares the solution to build, updates build variables with desired configurations",
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "commandLineArgs": "--target Prepare"
-    },
     "Build.Clean": {
       "description": "Clean all the output folders",
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "commandLineArgs": "--target Clean"
+      "commandLineArgs": "--target Clean --no-logo"
+    },
+    "Build.Prepare": {
+      "description": "Prepares the solution to build, updates build variables with desired configurations",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Prepare --no-logo"
+    },
+    "Build.Versioning": {
+      "description": "Update the version in the app files",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Versioning --no-logo"
     },
     "Build.Restore": {
       "description": "Restore packages, libraries and tooling",
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "commandLineArgs": "--target Restore"
+      "commandLineArgs": "--target Restore --no-logo"
     },
     "Build.Compile": {
       "description": "Compile the project",
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "commandLineArgs": "--target Compile"
+      "commandLineArgs": "--target Compile --no-logo"
     },
-    "Build.Test": {
-      "description": "Execute the test projects",
+    "Build.Publish:Test": {
+      "description": "Publish the project in the output folder",
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "commandLineArgs": "--target Test"
+      "commandLineArgs": "--target Publish --no-logo --configuration Release --environment Test"
     },
-    "Build.Coverage": {
-      "description": "Execute the test projects with code coverage",
+    "Build.Publish:Staging": {
+      "description": "Publish the project in the output folder",
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "commandLineArgs": "--target Coverage"
+      "commandLineArgs": "--target Publish --no-logo --configuration Release --environment Staging"
     },
-    "SonarQube.Analyze": {
-      "description": "Execute the SonarQube code analysis",
+    "Build.Publish:Production": {
+      "description": "Publish the project in the output folder",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Publish --no-logo --configuration Release --environment Production"
+    },
+    "Build.Pack": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Pack --no-logo"
+    },
+    "Test.UnitTest": {
+      "description": "Execute the unit test projects",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target UnitTest --no-logo"
+    },
+    "Test.UITest": {
+      "description": "Execute the UI test projects",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target UITest --no-logo"
+    },
+    "Test.Coverage": {
+      "description": "Execute the test coverage",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Coverage --no-logo"
+    },
+    "Analyze": {
+      "description": "Execute the code analysis",
       "commandName": "Project",
       "dotnetRunMessages": true,
       "commandLineArgs": "--target Analyze"

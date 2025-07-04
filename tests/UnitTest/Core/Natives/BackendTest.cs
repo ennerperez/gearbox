@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Gearbox.Core.Interfaces;
-using Gearbox.Core.Natives.Linux.Interop;
 #if LINUX
 using Gearbox.Core.Natives.Linux;
 #elif OSX

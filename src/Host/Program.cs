@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Gearbox.Core;
-using Gearbox.Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,13 +11,7 @@ using Microsoft.Extensions.Logging;
 using BackgroundService = Gearbox.Host.Services.BackgroundService;
 using OS = System.Runtime.OperatingSystemExtensions;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
-#if DEBUG
 using Serilog;
-
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-
-#else
-#endif
 
 namespace Gearbox.Host
 {
@@ -45,7 +37,6 @@ namespace Gearbox.Host
                 return;
             }
 
-#if DEBUG
             // Initialize Logger
             var loggerConfiguration = new LoggerConfiguration()
                 .WriteTo.Async(a =>
@@ -69,7 +60,6 @@ namespace Gearbox.Host
             Log.Logger = loggerConfiguration
                 .WriteTo.Trace()
                 .CreateLogger();
-#endif
 
             System.Runtime.Exceptions.UnhandledException += (_, e) =>
             {
@@ -114,9 +104,7 @@ namespace Gearbox.Host
 
             // Register all the services needed for the application to run
             builder.Services.AddSingleton(Configuration);
-#if DEBUG
             builder.Services.AddLogging(c => c.AddSerilog(Log.Logger, true));
-#endif
 
             // Core Services
             builder.Services

@@ -1,9 +1,10 @@
-﻿using Gearbox.Core.Models;
+﻿using System.Threading.Tasks;
+using Gearbox.Core.Models;
 
 namespace Gearbox.Core.Interfaces
 {
     public interface INotificationService
     {
-        void Show(Notification notification);
+        Task ShowAsync(Notification notification);
     }
 }

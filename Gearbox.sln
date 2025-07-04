@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".files", ".files", "{0A18FE
 		LICENSE = LICENSE
 		README.md = README.md
 		Makefile = Makefile
+		GitVersion.yml = GitVersion.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "src\Core\Core.csproj", "{083C287A-EE2A-4D68-A038-63CE85556E7C}"

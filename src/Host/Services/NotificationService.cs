@@ -1,12 +1,15 @@
-﻿using Gearbox.Core.Interfaces;
+﻿using System.Threading.Tasks;
+using Gearbox.Core.Interfaces;
 using Gearbox.Core.Models;
 
 namespace Gearbox.Host.Services
 {
     public class NotificationService : INotificationService
     {
-        public void Show(Notification notification)
+        public Task ShowAsync(Notification notification)
         {
+            return Task.CompletedTask;
         }
+        
     }
 }

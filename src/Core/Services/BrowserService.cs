@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Cysharp.Diagnostics;
 using Gearbox.Core.Exceptions;
 using Gearbox.Core.Interfaces;
 using Gearbox.Core.Models;
@@ -13,7 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Gearbox.Core.Services
 {
-    public partial class BrowserService : IBrowserService
+    public class BrowserService : IBrowserService
     {
         private readonly IBackend _backend;
         private readonly INotificationService _notificationService;
@@ -28,7 +29,7 @@ namespace Gearbox.Core.Services
             _logger = logger;
         }
 
-        public Task<int> LaunchAsync(string url, string windowTitle = "")
+        public async Task<bool> LaunchAsync(string url, string windowTitle = "")
         {
             try
             {
@@ -39,8 +40,6 @@ namespace Gearbox.Core.Services
 
                 var browsers = new Dictionary<string, Browser>();
                 _configuration.Bind("browsers", browsers);
-
-                _logger.LogInformation("Attempting to launch \"{Url}\"", url);
 
                 var urlPreferences = new Dictionary<string, string>();
                 _configuration.Bind("urls", urlPreferences);
@@ -91,61 +90,103 @@ namespace Gearbox.Core.Services
                         throw new BrowserException("Browser is not installed.", browser);
                     }
 
-                    var process = PrepareNativeProcess(browser, url);
-                    process.Start();
+                    _logger.LogInformation("Attempting to open \"{Url}\" with \"{Browser}\"", url, browser.Name);
 
-                    _notificationService.Show(new Notification("Browser launched.", $"{browser.Name} was launched."));
-                    return Task.FromResult(process.Id);
+                    await _notificationService.ShowAsync(new Notification("Browser launched.", $"{browser.Name} was launched."));
+
+                    await StartProcess(browser, url);
+
+                    return true;
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, "Failed to launch \"{Url}\" for \"{Browser}\", {Message}", url, browser?.Name, e.Message);
+                    _logger.LogError(e, "Failed to open \"{Url}\" for \"{Browser}\", {Message}", url, browser?.Name, e.Message);
                 }
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Failed to launch browser, {Message}", e.Message);
-                return Task.FromResult(0);
             }
 
-            return Task.FromResult(0);
+            return false;
         }
 
-        private static Process PrepareNativeProcess(Browser browser, string url)
+        public async Task<bool> LaunchAsync(IBrowser browser, string url)
         {
-            var process = new Process();
-            process.StartInfo = new ProcessStartInfo();
-            if (!string.IsNullOrWhiteSpace(browser.Path))
+            try
             {
-                if (OperatingSystem.IsLinux())
+                /* LAUNCH */
+
+                try
                 {
-                    var flatpak = FlatpakRegex();
-                    var match = flatpak.Match(browser.Path);
-                    if (match.Success)
+                    if (string.IsNullOrWhiteSpace(browser.Path))
                     {
-                        process.StartInfo.FileName = "flatpak";
-                        process.StartInfo.ArgumentList.Add("run");
-                        process.StartInfo.ArgumentList.Add(match.Groups[1].Value);
-                        process.StartInfo.WorkingDirectory = "/usr/bin";
+                        throw new BrowserException("Browser path cannot be launched without a value.", browser);
                     }
+
+                    if (!browser.IsInstalled)
+                    {
+                        throw new BrowserException("Browser is not installed.", browser);
+                    }
+
+                    _logger.LogInformation("Attempting to open \"{Url}\" with \"{Browser}\"", url, browser.Name);
+
+                    await _notificationService.ShowAsync(new Notification("Browser launched.", $"{browser.Name} was launched."));
+
+                    await StartProcess(browser, url);
+
+                    return true;
                 }
-                else
+                catch (Exception e)
                 {
-                    process.StartInfo.FileName = Environment.ExpandEnvironmentVariables(browser.Path);
-                    process.StartInfo.WorkingDirectory = Path.GetDirectoryName(process.StartInfo.FileName);
+                    _logger.LogError(e, "Failed to open \"{Url}\" for \"{Browser}\", {Message}", url, browser.Name, e.Message);
                 }
             }
-
-            if (!string.IsNullOrWhiteSpace(browser.Args))
+            catch (Exception e)
             {
-                process.StartInfo.ArgumentList.Add(browser.Args);
+                _logger.LogError(e, "Failed to launch browser, {Message}", e.Message);
             }
 
-            process.StartInfo.ArgumentList.Add($"{url}");
-            return process;
+            return false;
         }
 
-        [GeneratedRegex("flatpak run (.*)", RegexOptions.Compiled)]
-        private static partial Regex FlatpakRegex();
+        private async Task StartProcess(IBrowser browser, string url)
+        {
+            if (string.IsNullOrWhiteSpace(browser.Path)) { throw new OperationCanceledException("Browser path cannot be launched without a value."); }
+            ProcessX.AcceptableExitCodes = new[] { 0, 24 };
+            try
+            {
+                var fileName = Path.GetFileName(Environment.ExpandEnvironmentVariables(browser.Path));
+                if (OperatingSystem.IsWindows())
+                {
+                    fileName = Environment.ExpandEnvironmentVariables(browser.Path);
+                }
+                var startInfo = new ProcessStartInfo()
+                {
+                    FileName = fileName,
+                    Arguments = string.Join(" ", new[] { browser.Command, browser.Args, url }),
+                    WorkingDirectory = browser.WorkingDirectory,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                };
+                await ProcessX.StartAsync(startInfo).WaitAsync();
+            }
+            catch (ProcessErrorException ex)
+            {
+                if (!ProcessX.AcceptableExitCodes.Contains(ex.ExitCode))
+                {
+                    _logger.LogDebug("ERROR, ExitCode: " + ex.ExitCode);
+                    throw;
+                }
+            }
+        }
+
+        public IDictionary<string, T> GetBrowsers<T>() where T : IBrowser
+        {
+            var browsers = new Dictionary<string, T>();
+            _configuration.Bind("browsers", browsers);
+            return browsers;
+        }
     }
 }

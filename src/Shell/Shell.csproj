@@ -34,17 +34,43 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Content Include="..\..\res\icons\gearbox.icns">
+            <Link>Assets/gearbox.icns</Link>
+            <DependentUpon>gearbox.svg</DependentUpon>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\..\res\icons\gearbox.ico">
+            <Link>Assets/gearbox.ico</Link>
+            <DependentUpon>gearbox.svg</DependentUpon>
+        </Content>
+        <Content Include="..\..\res\icons\gearbox.png">
+            <Link>Assets/gearbox.png</Link>
+            <DependentUpon>gearbox.svg</DependentUpon>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\..\res\icons\gearbox.svg">
+            <Link>Assets/gearbox.svg</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\..\res\natives\linux\Gearbox.Desktop">
+            <Link>Natives/Linux/Gearbox.Desktop</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
         <Content Include="..\Core\Config.ini">
             <Link>Config.ini</Link>
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <Content Condition="'$(Configuration)' != 'Release'" Include="..\Core\Config.*.ini">
+        <Content Include="..\Core\Config.*.ini">
             <DependentUpon>Config.ini</DependentUpon>
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="DesktopNotifications.Avalonia" Version="1.3.1" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.6" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.6" />
         <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.6" />
@@ -73,7 +99,7 @@
         <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="11.3.0.1" />
     </ItemGroup>
 
-    <ItemGroup Label="Serilog" Condition="'$(Configuration)' == 'Debug'">
+    <ItemGroup Label="Serilog">
         <PackageReference Include="Serilog" Version="4.3.0" />
         <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0"/>
         <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
@@ -98,4 +124,5 @@
     <ItemGroup>
       <ProjectReference Include="..\Core\Core.csproj" />
     </ItemGroup>
+
 </Project>

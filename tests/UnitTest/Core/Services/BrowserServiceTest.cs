@@ -39,8 +39,8 @@ namespace Gearbox.UnitTest.Core.Services
         [InlineData("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")]
         public async Task LaunchUrlByBrowserAsync(string url)
         {
-            var processId = await _browserService.LaunchAsync(url);
-            processId.ShouldBeGreaterThan(0);
+            var result = await _browserService.LaunchAsync(url);
+            result.ShouldBeTrue();
         }
 
         [Theory]
@@ -48,8 +48,8 @@ namespace Gearbox.UnitTest.Core.Services
         [InlineData("https://youtube.com", "Microsoft Teams")]
         public async Task LaunchUrlBySourceAsync(string url, string window)
         {
-            var processId = await _browserService.LaunchAsync(url, window);
-            processId.ShouldBeGreaterThan(0);
+            var result = await _browserService.LaunchAsync(url, window);
+            result.ShouldBeTrue();
         }
 
     }

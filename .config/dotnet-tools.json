@@ -29,6 +29,18 @@
         "dotnet-coverage"
       ],
       "rollForward": false
+    },
+    "coverlet.console": {
+      "version": "6.0.4",
+      "commands": [
+        "coverlet"
+      ]
+    },
+    "trx2junit": {
+      "version": "2.1.0",
+      "commands": [
+        "trx2junit"
+      ]
     }
   }
 }

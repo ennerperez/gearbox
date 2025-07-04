@@ -54,7 +54,7 @@ namespace Gearbox.Core.Natives.MacOS
             OpenSettings();
 
             _logger.LogInformation("Please set {Product} as the default browser in Settings.", Metadata.Product);
-            _notificationService.Show(new Notification("Registered as a browser.", $"Please set {Metadata.Product} as the default browser in Settings."));
+            _notificationService.ShowAsync(new Notification("Register as deafult browser.", $"Please set {Metadata.Product} as the default browser in Settings."));
             return Task.FromResult(true);
         }
 
@@ -78,7 +78,7 @@ namespace Gearbox.Core.Natives.MacOS
                 case RegisterStatus.Updated:
                     await UnregisterAsync(); // Unregister the old path
                     await RegisterAsync(); // Register with the new path
-                    _notificationService.Show(new Notification("Updated location", $"{Metadata.Product} has been re-registered with a new path."));
+                    await _notificationService.ShowAsync(new Notification("Updated location", $"{Metadata.Product} has been re-registered with a new path."));
                     return true;
             }
             return false;

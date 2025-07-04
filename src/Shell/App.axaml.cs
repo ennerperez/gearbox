@@ -1,19 +1,12 @@
 using System.Linq;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
-using Gearbox.Core;
 using Gearbox.Shell.ViewModels;
 using Gearbox.Shell.Views;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
-#if DEBUG
-
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-
-#else
-#endif
 
 namespace Gearbox.Shell
 {
@@ -24,48 +17,51 @@ namespace Gearbox.Shell
             AvaloniaXamlLoader.Load(this);
         }
 
+        public Window? ActiveWindow
+        {
+            get
+            {
+                if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                {
+                    return desktop.MainWindow;
+                }
+
+                return null;
+            }
+        }
+
         public override void OnFrameworkInitializationCompleted()
         {
-            var vm = new MainWindowViewModel();
-            if (!Avalonia.Controls.Design.IsDesignMode)
+            MainWindow? window = null;
+            if (!Design.IsDesignMode)
             {
-
                 BindingPlugins.DataValidators.RemoveAt(0);
 
-                var services = new ServiceCollection();
-
-                if (Program.Configuration != null)
+                if (Program.Services != null)
                 {
-                    services.AddSingleton(Program.Configuration);
+                    Program.Services.GetRequiredService<MainWindowViewModel>();
+                    window = Program.Services.GetRequiredService<MainWindow>();
                 }
-#if DEBUG
-                services.AddLogging(c => c.AddSerilog(Log.Logger, true));
-#endif
-
-                services
-                    .AddInfrastructure()
-                    .AddPersistence()
-                    .AddCore().WithBackend();
-                services
-                    .RegisterServices()
-                    .RegisterViewsModels();
-
-                Program.Services = services.BuildServiceProvider();
-
-                vm = Program.Services.GetRequiredService<MainWindowViewModel>();
             }
+#if DEBUG
+
+            else
+            {
+                window = new MainWindow(new MainWindowViewModel());
+            }
+#endif
 
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
+                // Avoid duplicate validations from both Avalonia and the CommunityToolkit.
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
 
-                desktop.MainWindow = new MainWindow { DataContext = vm };
+                desktop.MainWindow = window;
             }
             else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
             {
-                singleViewPlatform.MainView = new MainWindow { DataContext = vm };
+                singleViewPlatform.MainView = window;
             }
 
             base.OnFrameworkInitializationCompleted();

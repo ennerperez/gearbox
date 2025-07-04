@@ -1,15 +1,15 @@
 using System;
-using Gearbox.Core.Models;
+using Gearbox.Core.Interfaces;
 
 namespace Gearbox.Core.Exceptions
 {
     public class BrowserException : Exception
     {
-        public BrowserException(string message, Browser? browser = null) : base(message)
+        public BrowserException(string message, IBrowser? browser = null) : base(message)
         {
             Browser = browser;
         }
 
-        public Browser? Browser { get; private set; }
+        public IBrowser? Browser { get; private set; }
     }
 }

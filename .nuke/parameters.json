@@ -1,4 +1,5 @@
 {
   "$schema": "build.schema.json",
-  "Solution": "Gearbox.sln"
+  "Solution": "Gearbox.sln",
+  "DesktopProjects": ["Shell"]
 }
