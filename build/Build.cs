@@ -1,13 +1,13 @@
-#define USING_SONARQUBE
+#if USING_7ZIP
+using System.Text;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-#if USING_7ZIP
-using System.Text;
-#endif
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Nuke.Common;
@@ -18,6 +18,9 @@ using Nuke.Common.Tooling;
 using Nuke.Common.Tools.Coverlet;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.Git;
+using Nuke.Common.Tools.GitVersion;
+using Nuke.Common.Tools.MauiCheck;
+using Nuke.Common.Tools.SonarScanner;
 using Nuke.Common.Utilities.Collections;
 using Serilog;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -57,9 +60,6 @@ public partial class Build : NukeBuild
 
     #region MAUI
 
-    [Parameter("MAUI Workload Version")]
-    public readonly string MauiWorkloadVersion = "9.0.203";
-
     [Parameter("Package Signing", Name = "Signing")]
     public readonly bool PackageSigning;
 
@@ -87,7 +87,7 @@ public partial class Build : NukeBuild
 
     static AbsolutePath SourceDirectory => RootDirectory / "src";
 
-    static AbsolutePath TestsDirectory => RootDirectory / "tests";
+    static AbsolutePath TestsDirectory => RootDirectory / "test" / "results";
 
     static AbsolutePath PublishDirectory => RootDirectory / "publish";
 
@@ -109,9 +109,7 @@ public partial class Build : NukeBuild
     [Parameter]
     public readonly string PackageId;
 
-    Version _version = new("1.0.0.0");
-    string _hash = string.Empty;
-    string _versionTag = string.Empty;
+    GitVersion _version = null;
 
     bool _useMaui;
     string _repoUrl = string.Empty;
@@ -122,38 +120,31 @@ public partial class Build : NukeBuild
 
     #region Projects
 
-    [Required]
-    [Parameter("Project Type to Build and Deploy")]
-    public readonly string Type;
+    [Required, Parameter("Projects to Build and Deploy")]
+    public readonly string[] Projects;
 
-    [Parameter]
-    public readonly string[] WebProjects = [];
-
-    [Parameter]
-    public readonly string[] ServiceProjects = [];
-
-    [Parameter]
-    public readonly string[] DesktopProjects = [];
-
-    [Parameter]
-    public readonly string[] MobileProjects = [];
-
-    [Parameter]
-    public readonly string[] PackageProjects = [];
-
-    [Parameter]
-    public readonly string[] TestsProjects = [];
-
-    static IEnumerable<Project> Projects = [];
-    static IEnumerable<Project> Tests = [];
+    private Dictionary<string, string[]> _projects;
+    private Project[] _webProjects;
+    private Project[] _serviceProjects;
+    private Project[] _desktopProjects;
+    private Project[] _mobileProjects;
+    private Project[] _packageProjects;
+    private Project[] _testProjects;
 
     #endregion
 
     Target Prepare => d => d
-        .Before(Compile)
+        .Before(Restore)
         .Executes(() =>
         {
             #region Projects
+
+            _projects = Projects.Select(m => new
+                {
+                    key = m.Split(":").FirstOrDefault(),
+                    value = m.Split(":").LastOrDefault()?.Split(",").ToArray()
+                })
+                .ToDictionary(k => k.key, v => v.value);
 
             Log.Information("Reading projects");
             foreach (var item in Solution.AllProjects)
@@ -176,17 +167,12 @@ public partial class Build : NukeBuild
                 project.ReevaluateIfNecessary();
             }
 
-            Projects = Type switch
-            {
-                "Web" => Solution.AllProjects.Where(m => WebProjects.Contains(m.Name)).ToArray(),
-                "Service" => Solution.AllProjects.Where(m => ServiceProjects.Contains(m.Name)).ToArray(),
-                "Desktop" => Solution.AllProjects.Where(m => DesktopProjects.Contains(m.Name)).ToArray(),
-                "Mobile" => Solution.AllProjects.Where(m => MobileProjects.Contains(m.Name)).ToArray(),
-                "Package" => Solution.AllProjects.Where(m => PackageProjects.Contains(m.Name)).ToArray(),
-                _ => Solution.AllProjects.Where(m =>
-                    Array.Empty<string>().Concat(WebProjects).Concat(ServiceProjects).Concat(DesktopProjects).Concat(MobileProjects).Contains(m.Name)).ToArray()
-            };
-            Tests = Solution.AllProjects.Where(m => TestsProjects.Contains(m.Name)).ToArray();
+            _webProjects = _projects.ContainsKey("Web") ? Solution.AllProjects.Where(m => _projects["Web"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
+            _serviceProjects = _projects.ContainsKey("Service") ? Solution.AllProjects.Where(m => _projects["Service"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
+            _desktopProjects = _projects.ContainsKey("Desktop") ? Solution.AllProjects.Where(m => _projects["Desktop"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
+            _mobileProjects = _projects.ContainsKey("Mobile") ? Solution.AllProjects.Where(m => _projects["Mobile"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
+            _packageProjects = _projects.ContainsKey("Package") ? Solution.AllProjects.Where(m => _projects["Package"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
+            _testProjects = _projects.ContainsKey("Test") ? Solution.AllProjects.Where(m => _projects["Test"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
 
             #endregion
 
@@ -200,7 +186,7 @@ public partial class Build : NukeBuild
                 gitUrl.WaitForExit();
             }
 
-            _useMaui = Projects.Select(m =>
+            _useMaui = Solution.AllProjects.Select(m =>
             {
                 var evaluatedValue = m.GetMSBuildProject()?.GetProperty("UseMaui")?.EvaluatedValue;
                 return evaluatedValue != null && bool.Parse(evaluatedValue);
@@ -218,16 +204,62 @@ public partial class Build : NukeBuild
             _androidExt = Environment == Environment.Production ? "aab" : "apk";
             _iOSExt = Platform != null && Platform.Contains("iPhoneSimulator", StringComparison.InvariantCultureIgnoreCase) ? "app" : "ipa";
 
-            // if (System.OperatingSystem.IsLinux())
-            // {
-            //     System.Environment.SetEnvironmentVariable("DOTNET_ROOT", "/usr/share/dotnet");
-            // }
-
             #endregion
         });
 
+    Target Restore => d => d
+        .DependsOn(Prepare)
+        .Executes(() =>
+        {
+            Log.Information("Restoring tools");
+            DotNetToolRestore(s => s.SetProcessWorkingDirectory(SourceDirectory));
+
+            try
+            {
+                if (_useMaui)
+                {
+                    Log.Information("Checking for MAUI workload installation");
+                    MauiCheckTasks.MauiCheck(c => c.SetNonInteractive(true));
+
+                    // var workloads = DotNet("workload list");
+                    // var isMauiInstalled = workloads.Any(x => x.Text.Contains("maui", StringComparison.OrdinalIgnoreCase));
+                    // if (!isMauiInstalled)
+                    // {
+                    //     Log.Information("Installing MAUI workload...");
+                    //     var workloadId = "maui-mobile";
+                    //     if (Platform.Contains("Android"))
+                    //     {
+                    //         workloadId = "maui-android";
+                    //     }
+                    //     else if (Platform.Contains("iPhone"))
+                    //     {
+                    //         workloadId = "maui-ios";
+                    //     }
+                    //
+                    //     DotNetWorkloadInstall(options =>
+                    //         options.SetWorkloadId(workloadId)
+                    //     );
+                    // }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "{Message}", ex.Message);
+                throw;
+            }
+
+            Log.Information("Restoring nugets");
+            DotNetRestore(s => s
+                .SetWarningLevel(WarningLevel)
+                .SetVerbosity(getDotNetVerbosity())
+                .SetPlatform(Platform)
+                .SetConfigFile(RootDirectory / "nuget.config")
+                .CombineWith(Solution.AllProjects, (x, v) => x
+                    .SetProjectFile(v)));
+        });
+
     Target Clean => d => d
-        .Before(Restore)
+        .Before(Prepare)
         .Executes(() =>
         {
             Log.Information("Cleaning Output Directories");
@@ -251,60 +283,65 @@ public partial class Build : NukeBuild
             }
         });
 
-    Target Restore => d => d
+    Target Versioning => d => d
         .DependsOn(Prepare)
         .Executes(() =>
         {
-            Log.Information("Restoring tools");
-            DotNetToolRestore(s => s.SetProcessWorkingDirectory(SourceDirectory));
+            _version = GitVersionTasks.GitVersion().Result;
 
-            try
+            if (Environment == Environment.Development)
             {
-                if (_useMaui)
-                {
-                    Log.Information("Checking for MAUI workload installation");
-                    var workloads = DotNet("workload list");
-                    var isMauiInstalled = workloads.Any(x => x.Text.Contains("maui", StringComparison.OrdinalIgnoreCase));
-                    if (!isMauiInstalled)
-                    {
-                        Log.Information("Installing MAUI workload...");
-                        var workloadId = "maui-mobile";
-                        if (Platform.Contains("Android"))
-                        {
-                            workloadId = "maui-android";
-                        }
-                        else if (Platform.Contains("iPhone"))
-                        {
-                            workloadId = "maui-ios";
-                        }
-
-                        DotNetWorkloadInstall(options =>
-                            options.SetWorkloadId(workloadId)
-                                .SetProcessAdditionalArguments($"--version {MauiWorkloadVersion}")
-                        );
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "{Message}", ex.Message);
-                throw;
+                return;
             }
 
-            Log.Information("Restoring nugets");
-            DotNetRestore(s => s
-                .SetWarningLevel(WarningLevel)
-                .SetVerbosity(getDotNetVerbosity())
-                .SetPlatform(Platform)
-                .SetConfigFile(RootDirectory / "nuget.config")
-                .CombineWith(Projects, (x, v) => x
-                    .SetProjectFile(v)));
+            var assemblyInfoFiles = SourceDirectory.GetFiles("AssemblyInfo*.cs", int.MaxValue);
+            foreach (var assemblyInfoVersionFile in assemblyInfoFiles)
+            {
+                Log.Information(messageTemplate: "Patching: {File}", assemblyInfoVersionFile);
+
+                var content = File.ReadAllText(assemblyInfoVersionFile);
+                content = AssemblyVersionRegex().Replace(content, $"[assembly: AssemblyVersion(\"{_version.AssemblySemVer}\")]");
+                content = AssemblyFileVersionRegex().Replace(content, $"[assembly: AssemblyFileVersion(\"{_version.AssemblySemFileVer}\")]");
+                content = AssemblyInformationalVersionRegex().Replace(content, $"[assembly: AssemblyInformationalVersion(\"{_version.InformationalVersion}\")]");
+
+                File.WriteAllText(assemblyInfoVersionFile, content);
+            }
+
+            if (!_useMaui)
+            {
+                return;
+            }
+
+            if (Verbosity == Verbosity.Minimal)
+            {
+                Console.WriteLine($"// ApplicationVersion: {_version.AssemblySemVer}");
+                Console.WriteLine($"// ApplicationDisplayVersion: {_version.FullSemVer}");
+            }
+            else
+            {
+                Log.Information($"ApplicationVersion: {_version.AssemblySemVer}");
+                Log.Information($"ApplicationDisplayVersion: {_version.FullSemVer}");
+            }
+
+            var items = loadPublishProjects();
+            foreach (var item in items.Where(m => m.useMaui))
+            {
+                var project = item.project.GetMSBuildProject();
+
+                // Version
+                project.SetProperty("ApplicationVersion", _version.AssemblySemVer);
+                project.SetProperty("ApplicationDisplayVersion", _version.FullSemVer);
+
+                project.Save(item.project.Path);
+                project.ReevaluateIfNecessary();
+            }
         });
 
     Target Compile => d => d
         .DependsOn(Clean)
-        .DependsOn(Restore)
         .DependsOn(Prepare)
+        .DependsOn(Restore)
+        .DependsOn(Versioning)
         .Executes(() =>
         {
             var items = loadPublishProjects();
@@ -348,175 +385,60 @@ public partial class Build : NukeBuild
                 ));
         });
 
-    Target UnitTest => d => d
+    Target Tests => d => d
         .DependsOn(Compile)
         .Executes(() =>
         {
-            if (!Tests.Any())
+            if (!_testProjects.Any())
             {
                 throw new OperationCanceledException("No tests found");
             }
+
+            AbsolutePath.Create(TestsDirectory).CreateOrCleanDirectory();
+
+            DotNetBuild(c => c.SetProjectFile(Solution.Path));
 
             DotNetTest(s => s
                 .EnableNoRestore()
                 .EnableNoBuild()
                 .SetConfiguration(Configuration)
-                .When((_) => true, configurator: x => x
-                    .SetLoggers("trx")
-                    .SetResultsDirectory(TestsDirectory / "results"))
-                .CombineWith(Tests, configurator: (x, v) => x
-                    .SetProjectFile(v.Path)));
-
-            DotNetToolRestore(s => s.SetProcessWorkingDirectory(SourceDirectory));
-
-            var tests = Solution.AllProjects.Where(s => TestsProjects.Contains(s.Name)).ToArray();
-            var testsProjects = tests.Where(m => !m.Name.Contains("UI", StringComparison.OrdinalIgnoreCase)).ToArray();
-
-            DotNetTest(s => s
-                .SetVerbosity(getDotNetVerbosity())
-                .SetConfiguration(Configuration)
+                .SetResultsDirectory(TestsDirectory)
                 .SetCollectCoverage(true)
-                .SetCoverletOutputFormat("cobertura")
-                .SetCoverletOutput(TestsDirectory / "coverage")
-                .SetLoggers("trx")
-                .SetResultsDirectory(TestsDirectory / "results")
+                .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
+                .SetLoggers("trx", "html")
                 .SetDataCollector("XPlat Code Coverage")
-                .CombineWith(testsProjects, configurator: (x, v) => x
+                .CombineWith(_testProjects, configurator: (x, v) => x
                     .SetProjectFile(v.Path)));
 
-            DotNet($"reportgenerator -reports:\"{TestsDirectory / "results"}/**/coverage.cobertura.xml\" -targetdir:{TestsDirectory / "coverage"} -reporttypes:\"cobertura\"");
-
-            (TestsDirectory / "results").GlobFiles("*.trx")
-                .ForEach(m =>
-                {
-                    DotNet($"trx2junit {m}");
-                });
+            // var covertura = TestsDirectory.GlobFiles("**/coverage.cobertura.xml");
+            //
+            // ReportGeneratorTasks.ReportGenerator(r => r
+            //     .CombineWith(covertura, (s, p) => s
+            //         .SetReports(p)
+            //         .SetTargetDirectory(TestsDirectory)
+            //         .SetReportTypes(ReportTypes.Html, ReportTypes.Cobertura, ReportTypes.MarkdownSummary, ReportTypes.SonarQube)
+            //     ));
         });
 
     Target UITest => d => d
-        .DependsOn(Prepare)
+        .DependsOn(Compile)
         .Executes(() =>
         {
             DotNetToolRestore(s => s.SetProcessWorkingDirectory(SourceDirectory));
 
-            var tests = Solution.AllProjects.Where(s => TestsProjects.Contains(s.Name)).ToArray();
-            var testsProjects = tests.Where(m => m.Name.Contains("UI", StringComparison.OrdinalIgnoreCase)).ToArray();
+            var testsProjects = _testProjects.Where(m => m.Name.Contains("UI", StringComparison.OrdinalIgnoreCase)).ToArray();
 
             DotNetTest(s => s
                 .SetVerbosity(getDotNetVerbosity())
                 .SetConfiguration(Configuration)
                 .CombineWith(testsProjects, configurator: (x, v) => x
                     .SetProjectFile(v.Path)));
-        });
-
-    Target Coverage => d => d
-        .Executes(() =>
-        {
-            DotNetToolRestore(s => s.SetProcessWorkingDirectory(SourceDirectory));
-            AbsolutePath.Create(TestsDirectory / "coverage").CreateOrCleanDirectory();
-            DotNet($"reportgenerator -reports:\"{TestsDirectory / "results"}/**/coverage.cobertura.xml\" -targetdir:{TestsDirectory / "coverage"} -reporttypes:\"cobertura;html;teamcitysummary\"");
-        });
-
-    Target Versioning => d => d
-        .DependsOn(Prepare)
-        .After(Prepare)
-        .Executes(() =>
-        {
-            var versionRegex = VersionRegex();
-            Tuple<Version, string> tag;
-
-            try
-            {
-                tag = GitTasks.Git("describe --tags --always --abbrev=0").Select(m => m.Text)
-                    .Select(m => versionRegex.Match(m))
-                    .Where(m => m.Success)
-                    .Select(m => new Tuple<Version, string>(Version.Parse(m.Groups[1].Value), m.Groups[2].Value))
-                    .FirstOrDefault();
-            }
-            catch (Exception)
-            {
-                Log.Warning("Unable to get repository tags using CLI.");
-                using var gitTag = new Process();
-                gitTag.StartInfo = new ProcessStartInfo(fileName: "git", arguments: "describe --tags --always --abbrev=0") { WorkingDirectory = RootDirectory, RedirectStandardOutput = true, UseShellExecute = false };
-                gitTag.Start();
-                tag = new[] { gitTag.StandardOutput.ReadToEnd().Trim() }
-                    .Select(m => versionRegex.Match(m))
-                    .Where(m => m.Success)
-                    .Select(m => new Tuple<Version, string>(Version.Parse(m.Groups[1].Value), m.Groups[2].Value))
-                    .FirstOrDefault();
-            }
-
-            _version = tag?.Item1;
-            _versionTag = tag?.Item2;
-            _hash = Repository.Commit;
-
-            Log.Information("Version: {Version} \n Tag: {VersionTag} \n Hash: {Hash}", _version, _versionTag, _hash);
-
-            if (_version == null)
-            {
-                Log.Warning("Version was not detected");
-                _version = new Version("1.0.0");
-            }
-
-            if (Environment == Environment.Development)
-            {
-                return;
-            }
-
-            var assemblyInfoFiles = SourceDirectory.GetFiles("AssemblyInfo*.cs", int.MaxValue);
-            foreach (var assemblyInfoVersionFile in assemblyInfoFiles)
-            {
-                Log.Information(messageTemplate: "Patching: {File}", assemblyInfoVersionFile);
-
-                var content = File.ReadAllText(assemblyInfoVersionFile);
-                content = AssemblyVersionRegex().Replace(content, $"[assembly: AssemblyVersion(\"{_version}\")]");
-                content = AssemblyFileVersionRegex().Replace(content, $"[assembly: AssemblyFileVersion(\"{_version}\")]");
-                content = AssemblyInformationalVersionRegex().Replace(content, $"[assembly: AssemblyInformationalVersion(\"{_version:3}{(!string.IsNullOrWhiteSpace(_versionTag) ? $"-{_versionTag}" : "")}+{_hash}\")]");
-
-                File.WriteAllText(assemblyInfoVersionFile, content);
-            }
-
-            if (!_useMaui)
-            {
-                return;
-            }
-
-            {
-                var applicationVersion = string.Join("-", new[] { _version?.ToString(3), _versionTag }.Where(r => !string.IsNullOrWhiteSpace(r)));
-                var applicationDisplayVersion = ((int)(DateTime.UtcNow.Ticks / 100000000)).ToString();
-
-                if (Verbosity == Verbosity.Minimal)
-                {
-                    Console.WriteLine($"// ApplicationVersion: {applicationVersion}");
-                    Console.WriteLine($"// ApplicationDisplayVersion: {applicationDisplayVersion}");
-                }
-                else
-                {
-                    Log.Information($"ApplicationVersion: {applicationVersion}");
-                    Log.Information($"ApplicationDisplayVersion: {applicationDisplayVersion}");
-                }
-
-                var items = loadPublishProjects();
-                foreach (var item in items.Where(m => m.useMaui))
-                {
-                    var project = item.project.GetMSBuildProject();
-
-                    // Version
-                    project.SetProperty("ApplicationDisplayVersion", string.Join("-", new[] { _version?.ToString(3), _versionTag }.Where(r => !string.IsNullOrWhiteSpace(r))));
-                    project.SetProperty("ApplicationVersion", ((int)(DateTime.UtcNow.Ticks / 100000000)).ToString());
-
-                    project.Save(item.project.Path);
-                    project.ReevaluateIfNecessary();
-                }
-            }
         });
 
     Target Publish => d => d
         .DependsOn(Clean)
-        //.DependsOn(Test)
-        .DependsOn(Restore)
-        .DependsOn(Compile)
         .DependsOn(Prepare)
+        .DependsOn(Restore)
         .DependsOn(Versioning)
         .Executes(() =>
         {
@@ -533,7 +455,13 @@ public partial class Build : NukeBuild
                     select new { item.project, item.framework };
             }
 
-            if (Type.StartsWith("Web") || Type.StartsWith("Service"))
+            var hasWeb = (_projects.ContainsKey("Web") && _projects["Web"].Any());
+            var hasService = (_projects.ContainsKey("Service") && _projects["Service"].Any());
+            var hasMobile = (_projects.ContainsKey("Mobile") && _projects["Mobile"].Any());
+            var hasDesktop = (_projects.ContainsKey("Desktop") && _projects["Desktop"].Any());
+            var hasPackage = (_projects.ContainsKey("Package") && _projects["Package"].Any());
+
+            if (hasWeb || hasService)
             {
                 DotNetPublish(s => s
                     .SetWarningLevel(WarningLevel)
@@ -547,7 +475,7 @@ public partial class Build : NukeBuild
                         .SetFramework(v.framework)
                         .SetOutput($"{PublishDirectory}/{v.project.Name}")));
             }
-            else if (Type.StartsWith("Mobile"))
+            else if (hasMobile)
             {
                 DotNetPublish(s => s
                     .SetWarningLevel(WarningLevel)
@@ -572,7 +500,7 @@ public partial class Build : NukeBuild
                     )
                 );
             }
-            else if (Type.StartsWith("Desktop"))
+            else if (hasDesktop)
             {
                 DotNetPublish(s => s
                     .SetWarningLevel(WarningLevel)
@@ -585,7 +513,7 @@ public partial class Build : NukeBuild
                         .SetFramework(v.framework)
                         .SetOutput($"{PublishDirectory}/{v.project.Name}")));
             }
-            else if (Type.StartsWith("Package"))
+            else if (hasPackage)
             {
                 foreach (var item in publishProjects)
                 {
@@ -598,12 +526,12 @@ public partial class Build : NukeBuild
                             .SetProject(projectInfo)
                             .SetConfiguration(Configuration)
                             .AddProperty("Icon", ".editoricon.png")
-                            .SetVersion($"{_version:3}{(!string.IsNullOrWhiteSpace(_versionTag) ? $"-{_versionTag}" : "")}")
+                            //.SetVersion($"{_version:3}{(!string.IsNullOrWhiteSpace(_versionTag) ? $"-{_versionTag}" : "")}")
                             .SetTitle($"{Product} {projectInfo.Name}")
                             .SetAuthors(Author)
                             .SetDescription($"{Product} {projectInfo.Name}")
                             .SetCopyright($"Copyright \u00a9 {Author}")
-                            .SetVersionSuffix(_version.ToString(3))
+                            //.SetVersionSuffix(_version.ToString(3))
                             .SetRepositoryUrl(_repoUrl)
                             .SetRepositoryType("git")
                             .SetOutputDirectory($"{PublishDirectory}/{item.project.Name}"));
@@ -620,7 +548,6 @@ public partial class Build : NukeBuild
 
     Target Pack => d => d
         .DependsOn(Publish)
-        .DependsOn(Prepare)
         .Executes(() =>
         {
             var items = loadPublishProjects();
@@ -706,9 +633,15 @@ public partial class Build : NukeBuild
             }
 #endif
 
+            var hasWeb = (_projects.ContainsKey("Web") && _projects["Web"].Any());
+            var hasService = (_projects.ContainsKey("Service") && _projects["Service"].Any());
+            var hasMobile = (_projects.ContainsKey("Mobile") && _projects["Mobile"].Any());
+            var hasDesktop = (_projects.ContainsKey("Desktop") && _projects["Desktop"].Any());
+            var hasPackage = (_projects.ContainsKey("Package") && _projects["Package"].Any());
+
             foreach (var item in target)
             {
-                if (Type.StartsWith("Desktop"))
+                if (hasDesktop)
                 {
 #if USING_7ZIP
                     if (OperatingSystem.IsWindows())
@@ -732,7 +665,7 @@ public partial class Build : NukeBuild
                     }
 #endif
                 }
-                else if (Type.StartsWith("Mobile"))
+                else if (hasMobile)
                 {
                     var change = AbsolutePath.Create(item.project.Directory / "Content").GlobFiles("CHANGES").FirstOrDefault();
                     var files = AbsolutePath.Create(item.project.Directory / "Content").GlobFiles("CHANGES.*.txt").ToArray();
@@ -769,12 +702,12 @@ public partial class Build : NukeBuild
                     (ArtifactsDirectory / "Android").GlobFiles($"*.{_androidExt}").FirstOrDefault()?.RenameWithoutExtension($"{PackageId}", ExistsPolicy.FileOverwrite);
                     (ArtifactsDirectory / "iOS" / "").GlobFiles($"*.{_iOSExt}").FirstOrDefault()?.RenameWithoutExtension($"{PackageId}", ExistsPolicy.FileOverwrite);
                 }
-                else if (Type.StartsWith("Web") || Type.StartsWith("Service"))
+                else if (hasWeb || hasService)
                 {
                     AbsolutePathExtensions.DeleteFile($"{ArtifactsDirectory}/{item.project.Name}.zip");
                     ZipFile.CreateFromDirectory($"{PublishDirectory}/{item.project.Name}", $"{ArtifactsDirectory}/{item.project.Name}.zip");
                 }
-                else if (Type.StartsWith("Package"))
+                else if (hasPackage)
                 {
                     var packageId = item.project.GetProperty("PackageId");
                     AbsolutePathExtensions.DeleteFile($"{ArtifactsDirectory}/{packageId}.*.nupkg");
@@ -797,7 +730,6 @@ public partial class Build : NukeBuild
         });
 
     Target Analyze => d => d
-        .DependsOn(Restore)
         .After(Restore)
         .Executes(() =>
         {
@@ -806,7 +738,7 @@ public partial class Build : NukeBuild
             SonarLint lint;
             if (File.Exists(lintFile))
             {
-                lint = System.Text.Json.JsonSerializer.Deserialize<SonarLint>(File.ReadAllText(lintFile));
+                lint = JsonSerializer.Deserialize<SonarLint>(File.ReadAllText(lintFile));
             }
             else
             {
@@ -819,10 +751,21 @@ public partial class Build : NukeBuild
 
             if (lint != null)
             {
-                DotNet(@$"sonarscanner begin /k:""{lint.projectKey}"" /d:sonar.host.url=""{lint.sonarQubeUri}"" /d:sonar.exclusions=""**/.sonarlint/*.*"" /d:sonar.token=""{lint.sonarQubeToken}"" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml");
+                SonarScannerTasks.SonarScannerBegin(s => s
+                    .SetProjectKey(lint.projectKey)
+                    .SetToken(lint.sonarQubeToken)
+                    .SetAdditionalParameter("sonar.host.url", lint.sonarQubeUri)
+                    .SetAdditionalParameter("sonar.exclusions", "**/.sonarlint/*.*")
+                    .SetAdditionalParameter("sonar.cs.vscoveragexml.reportsPaths", TestsDirectory / "coverage" / "coverage.xml")
+                );
                 DotNetBuild(s => s.SetProjectFile(Solution));
-                Process.Start("dotnet", "dotnet-coverage collect \"dotnet test\" -f xml -o \"coverage.xml\"")?.WaitForExit();
-                DotNet(@$"sonarscanner end /d:sonar.token=""{lint.sonarQubeToken}""");
+                // DotCoverTasks.DotCoverCover(c => c
+                //     .SetReportType(DotCoverReportType.Xml)
+                //     .SetOutputFile(TestsDirectory / "coverage" / "coverage.xml")
+                // );
+                SonarScannerTasks.SonarScannerEnd(s => s
+                    .SetToken(lint.sonarQubeToken)
+                );
             }
             else
             {
@@ -835,7 +778,7 @@ public partial class Build : NukeBuild
 
     private PublishProjectRecord[] loadPublishProjects()
     {
-        foreach (var item in Projects)
+        foreach (var item in Solution.Projects)
         {
             var project = item.GetMSBuildProject();
             var options = project.Imports.FirstOrDefault(m => m.ImportedProject.EscapedFullPath.EndsWith("Options.props"));
@@ -871,7 +814,7 @@ public partial class Build : NukeBuild
             project.ReevaluateIfNecessary();
         }
 
-        var internalProjects = (from project in Projects
+        var internalProjects = (from project in Solution.Projects
             let info = project.GetMSBuildProject()
             let useMaui = info.GetPropertyValue("UseMaui")
             select new PublishProjectRecord(
@@ -906,9 +849,6 @@ public partial class Build : NukeBuild
 
         return string.Join(System.Environment.NewLine, releaseNotes);
     }
-
-    [GeneratedRegex(@"v?\=?((?:[0-9]{1,}\.{0,}){1,})\-?(.*)", RegexOptions.Compiled)]
-    private static partial Regex VersionRegex();
 
     [GeneratedRegex(@"\[assembly: AssemblyVersion\(.*\)\]", RegexOptions.Compiled)]
     private static partial Regex AssemblyVersionRegex();

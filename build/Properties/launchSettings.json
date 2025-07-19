@@ -53,23 +53,46 @@
       "dotnetRunMessages": true,
       "commandLineArgs": "--target Pack --no-logo"
     },
-    "Test.UnitTest": {
-      "description": "Execute the unit test projects",
+    "Migrate.MigrationAdd": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "commandLineArgs": "--target UnitTest --no-logo"
+      "commandLineArgs": "--target MigrationAdd --no-logo"
     },
-    "Test.UITest": {
-      "description": "Execute the UI test projects",
+    "Migrate.MigrationRemove": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "commandLineArgs": "--target UITest --no-logo"
+      "commandLineArgs": "--target MigrationRemove --no-logo"
     },
-    "Test.Coverage": {
-      "description": "Execute the test coverage",
+    "Migrate.MigrationOutput": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "commandLineArgs": "--target Coverage --no-logo"
+      "commandLineArgs": "--target MigrationOutput --no-logo"
+    },
+    "Migrate.DatabaseUpdate": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target DatabaseUpdate --no-logo"
+    },
+    "Migrate.DatabaseClear": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target DatabaseClear --no-logo"
+    },
+    "Migrate.DatabaseRollback": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target DatabaseRollback --no-logo"
+    },
+    "Migrate.DbContextOptimize": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target DbContextOptimize --no-logo"
+    },
+    "Tests": {
+      "description": "Execute the tests projects",
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "commandLineArgs": "--target Tests --no-logo"
     },
     "Analyze": {
       "description": "Execute the code analysis",

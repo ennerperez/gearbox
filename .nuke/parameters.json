@@ -1,5 +1,11 @@
 {
   "$schema": "build.schema.json",
   "Solution": "Gearbox.sln",
-  "DesktopProjects": ["Shell"]
+  "Author": "Enner Pérez",
+  "Product": "Gearbox",
+  "ProjectUrl": "https://ennerperez.dev/",
+  "PackageId": "dev.ennerperez.gearbox",
+  "Projects": [
+    "Desktop:Shell"
+  ]
 }
