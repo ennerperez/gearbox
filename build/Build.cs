@@ -123,8 +123,8 @@ public partial class Build : NukeBuild
     #region Projects
 
     [Required]
-    [Parameter("Project Name to Build and Deploy")]
-    public readonly string Project;
+    [Parameter("Project Type to Build and Deploy")]
+    public readonly string Type;
 
     [Parameter]
     public readonly string[] WebProjects = [];
@@ -176,7 +176,7 @@ public partial class Build : NukeBuild
                 project.ReevaluateIfNecessary();
             }
 
-            Projects = Project switch
+            Projects = Type switch
             {
                 "Web" => Solution.AllProjects.Where(m => WebProjects.Contains(m.Name)).ToArray(),
                 "Service" => Solution.AllProjects.Where(m => ServiceProjects.Contains(m.Name)).ToArray(),
@@ -533,7 +533,7 @@ public partial class Build : NukeBuild
                     select new { item.project, item.framework };
             }
 
-            if (Project.StartsWith("Web") || Project.StartsWith("Service"))
+            if (Type.StartsWith("Web") || Type.StartsWith("Service"))
             {
                 DotNetPublish(s => s
                     .SetWarningLevel(WarningLevel)
@@ -547,7 +547,7 @@ public partial class Build : NukeBuild
                         .SetFramework(v.framework)
                         .SetOutput($"{PublishDirectory}/{v.project.Name}")));
             }
-            else if (Project.StartsWith("Mobile"))
+            else if (Type.StartsWith("Mobile"))
             {
                 DotNetPublish(s => s
                     .SetWarningLevel(WarningLevel)
@@ -572,7 +572,7 @@ public partial class Build : NukeBuild
                     )
                 );
             }
-            else if (Project.StartsWith("Desktop"))
+            else if (Type.StartsWith("Desktop"))
             {
                 DotNetPublish(s => s
                     .SetWarningLevel(WarningLevel)
@@ -585,7 +585,7 @@ public partial class Build : NukeBuild
                         .SetFramework(v.framework)
                         .SetOutput($"{PublishDirectory}/{v.project.Name}")));
             }
-            else if (Project.StartsWith("Package"))
+            else if (Type.StartsWith("Package"))
             {
                 foreach (var item in publishProjects)
                 {
@@ -708,7 +708,7 @@ public partial class Build : NukeBuild
 
             foreach (var item in target)
             {
-                if (Project.StartsWith("Desktop"))
+                if (Type.StartsWith("Desktop"))
                 {
 #if USING_7ZIP
                     if (OperatingSystem.IsWindows())
@@ -732,7 +732,7 @@ public partial class Build : NukeBuild
                     }
 #endif
                 }
-                else if (Project.StartsWith("Mobile"))
+                else if (Type.StartsWith("Mobile"))
                 {
                     var change = AbsolutePath.Create(item.project.Directory / "Content").GlobFiles("CHANGES").FirstOrDefault();
                     var files = AbsolutePath.Create(item.project.Directory / "Content").GlobFiles("CHANGES.*.txt").ToArray();
@@ -769,12 +769,12 @@ public partial class Build : NukeBuild
                     (ArtifactsDirectory / "Android").GlobFiles($"*.{_androidExt}").FirstOrDefault()?.RenameWithoutExtension($"{PackageId}", ExistsPolicy.FileOverwrite);
                     (ArtifactsDirectory / "iOS" / "").GlobFiles($"*.{_iOSExt}").FirstOrDefault()?.RenameWithoutExtension($"{PackageId}", ExistsPolicy.FileOverwrite);
                 }
-                else if (Project.StartsWith("Web") || Project.StartsWith("Service"))
+                else if (Type.StartsWith("Web") || Type.StartsWith("Service"))
                 {
                     AbsolutePathExtensions.DeleteFile($"{ArtifactsDirectory}/{item.project.Name}.zip");
                     ZipFile.CreateFromDirectory($"{PublishDirectory}/{item.project.Name}", $"{ArtifactsDirectory}/{item.project.Name}.zip");
                 }
-                else if (Project.StartsWith("Package"))
+                else if (Type.StartsWith("Package"))
                 {
                     var packageId = item.project.GetProperty("PackageId");
                     AbsolutePathExtensions.DeleteFile($"{ArtifactsDirectory}/{packageId}.*.nupkg");
