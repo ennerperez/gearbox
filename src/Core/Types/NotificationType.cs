@@ -1,6 +1,6 @@
 ﻿namespace Gearbox.Core.Types
 {
-    public enum NotificationType : short
+    public enum NotificationType
     {
         Information = 0,
         Success,

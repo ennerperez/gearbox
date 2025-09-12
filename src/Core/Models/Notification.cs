@@ -20,7 +20,7 @@ namespace Gearbox.Core.Models
         public string Message { get; set; }
         public NotificationType Type { get; set; }
         public TimeSpan? Expiration { get; set; }
-        public Action? OnClick { get; set; }
-        public Action? OnClose { get; set; }
+        public Action OnClick { get; set; }
+        public Action OnClose { get; set; }
     }
 }

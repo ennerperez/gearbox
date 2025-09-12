@@ -28,7 +28,7 @@ namespace Gearbox.Shell.ViewModels
         [ObservableProperty]
         private bool _isVisible = true;
 
-        public Window? Owner { get; set; }
+        public Window Owner { get; set; }
 
     }
 }

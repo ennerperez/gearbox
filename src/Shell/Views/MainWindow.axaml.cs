@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -44,7 +43,7 @@ namespace Gearbox.Shell.Views
             base.Show();
         }
 
-        private void InputElement_OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+        private void InputElement_OnPointerWheelChanged(object sender, PointerWheelEventArgs e)
         {
             if (sender is not ScrollViewer scrollViewer)
             {
@@ -62,7 +61,7 @@ namespace Gearbox.Shell.Views
         private bool _mouseDownForWindowMoving;
         private PointerPoint _originalPoint;
 
-        private void InputElement_OnPointerMoved(object? sender, PointerEventArgs e)
+        private void InputElement_OnPointerMoved(object sender, PointerEventArgs e)
         {
             if (!_mouseDownForWindowMoving) { return; }
 
@@ -71,7 +70,7 @@ namespace Gearbox.Shell.Views
                 Position.Y + (int)(currentPoint.Position.Y - _originalPoint.Position.Y));
         }
 
-        private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+        private void InputElement_OnPointerPressed(object sender, PointerPressedEventArgs e)
         {
             if (WindowState == WindowState.Maximized || WindowState == WindowState.FullScreen) { return; }
 
@@ -79,7 +78,7 @@ namespace Gearbox.Shell.Views
             _originalPoint = e.GetCurrentPoint(this);
         }
 
-        private void InputElement_OnPointerReleased(object? sender, PointerReleasedEventArgs e)
+        private void InputElement_OnPointerReleased(object sender, PointerReleasedEventArgs e)
         {
             _mouseDownForWindowMoving = false;
         }

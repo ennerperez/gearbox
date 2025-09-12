@@ -1,4 +1,5 @@
-﻿using Gearbox.Core.Models;
+﻿using System;
+using Gearbox.Core.Models;
 using Shouldly;
 
 namespace Gearbox.UnitTest.Core.Models
@@ -6,7 +7,7 @@ namespace Gearbox.UnitTest.Core.Models
     public class SendReceiptTest
     {
         [Fact]
-        public void Should_Create_A_New_SendReceipt()
+        public void ShouldCreateANewSendReceipt()
         {
             var messageId = "test-message-id";
             var insertionTime = DateTimeOffset.UtcNow;

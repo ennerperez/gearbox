@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Label="Framework" Condition="'$(UseMaui)' != 'true'">
+    <TargetFramework>net9.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup Label="Framework" Condition="'$(UseMaui)' == 'true'">
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+  </PropertyGroup>
+
+  <PropertyGroup Label="General">
+    <UsingAssemblyInfoTemplate>true</UsingAssemblyInfoTemplate>
+    <SkipServerCertificateValidation>true</SkipServerCertificateValidation>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Databases">
+    <UsingSqlite>false</UsingSqlite>
+    <UsingSqlServer>false</UsingSqlServer>
+    <UsingMariaDb>false</UsingMariaDb>
+    <UsingMySql>false</UsingMySql>
+    <UsingPostgreSql>true</UsingPostgreSql>
+    <UsingOracle>false</UsingOracle>
+    <UsingDapper>false</UsingDapper>
+    <UsingNonAsync>false</UsingNonAsync>
+    <UsingBulk>false</UsingBulk>
+    <UsingSplit>false</UsingSplit>
+    <UsingMultiTenancy>false</UsingMultiTenancy>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Azure">
+    <UsingAzureBlobs>false</UsingAzureBlobs>
+    <UsingAzureQueues>false</UsingAzureQueues>
+    <UsingAzureTables>false</UsingAzureTables>
+    <UsingAzureKeyVault>false</UsingAzureKeyVault>
+    <UsingAzureAppConfiguration>false</UsingAzureAppConfiguration>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Services">
+    <UsingQuestPDF>false</UsingQuestPDF>
+    <UsingNewtonsoft>false</UsingNewtonsoft>
+    <UsingSwagger>false</UsingSwagger>
+    <UsingLocalization>false</UsingLocalization>
+    <UsingSass>true</UsingSass>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Auth">
+    <UsingIdentity>false</UsingIdentity>
+    <UsingCookies>false</UsingCookies>
+    <UsingApiKey>false</UsingApiKey>
+    <UsingBearer>true</UsingBearer>
+    <UsingOpenId>false</UsingOpenId>
+    <UsingAuth0>true</UsingAuth0>
+    <UsingSmartSchema>false</UsingSmartSchema>
+    <UsingApiKeyTables>false</UsingApiKeyTables>
+    <UsingTokenValidation>false</UsingTokenValidation>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Options">
+    <UsingFeatureFlag>false</UsingFeatureFlag>
+    <UsingSassWatch>false</UsingSassWatch>
+    <UsingDatadog>true</UsingDatadog>
+    <UsingHealthCheck>true</UsingHealthCheck>
+    <UsingCors>false</UsingCors>
+    <UsingCompression>true</UsingCompression>
+    <UsingSession>true</UsingSession>
+    <CookieConsentNeeded>false</CookieConsentNeeded>
+    <UsingAuth0Api>false</UsingAuth0Api>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Loggin">
+    <UsingSerilog>false</UsingSerilog>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Telemetry">
+    <UsingAzureApplicationInsights>false</UsingAzureApplicationInsights>
+    <UsingDatadog>true</UsingDatadog>
+    <UsingSentry>false</UsingSentry>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Analysis">
+    <UsingSonarQube>true</UsingSonarQube>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Testing">
+    <TestExecutionFramework>xUnit</TestExecutionFramework>
+    <UsingReqnroll>true</UsingReqnroll>
+    <UsingChromeDriver>false</UsingChromeDriver>
+    <UsingGeckoDriver>false</UsingGeckoDriver>
+    <UsingIEDriver>false</UsingIEDriver>
+  </PropertyGroup>
+
+</Project>

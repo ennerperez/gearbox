@@ -1,4 +1,5 @@
-﻿using Gearbox.Core.Models;
+﻿using System;
+using Gearbox.Core.Models;
 using Gearbox.Core.Types;
 using Shouldly;
 
@@ -7,7 +8,7 @@ namespace Gearbox.UnitTest.Core.Models
     public class NotificationTest
     {
         [Fact]
-        public void Should_Create_A_New_Notification()
+        public void ShouldCreateANewNotification()
         {
             var model = new Notification()
             {
@@ -20,7 +21,7 @@ namespace Gearbox.UnitTest.Core.Models
         }
 
         [Fact]
-        public void Should_Create_A_New_Notification_With_Type()
+        public void ShouldCreateANewNotificationWithType()
         {
             var model = new Notification("Test Title", "This is a test message.")
             {

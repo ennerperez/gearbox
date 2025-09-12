@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Gearbox.Host
 {
     [ExcludeFromCodeCoverage]
-    public static class Extensions
+    public static class DependencyInjectionExtensions
     {
         public static IServiceCollection AddHost(this IServiceCollection serviceCollection)
         {

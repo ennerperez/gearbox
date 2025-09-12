@@ -17,7 +17,7 @@ namespace Gearbox.Shell
             AvaloniaXamlLoader.Load(this);
         }
 
-        public Window? ActiveWindow
+        public Window ActiveWindow
         {
             get
             {
@@ -32,7 +32,7 @@ namespace Gearbox.Shell
 
         public override void OnFrameworkInitializationCompleted()
         {
-            MainWindow? window = null;
+            MainWindow window = null;
             if (!Design.IsDesignMode)
             {
                 BindingPlugins.DataValidators.RemoveAt(0);

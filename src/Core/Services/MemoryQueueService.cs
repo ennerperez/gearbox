@@ -15,28 +15,30 @@ namespace Gearbox.Core.Services
 
         public double ExpireOn { get; set; } = 3600; // Default expiration time in seconds (1 hour)
 
-        public Task<PeekedMessage?> PeekMessageAsync(string queueName = "", CancellationToken cancellationToken = default)
+        public Task<PeekedMessage> PeekMessageAsync(string queueName = "", CancellationToken cancellationToken = default)
         {
-            if (!s_channel.ContainsKey(queueName))
+            if (!s_channel.TryGetValue(queueName, out Channel<object> value))
             {
-                s_channel.Add(queueName, Channel.CreateUnbounded<object>());
+                value = Channel.CreateUnbounded<object>();
+                s_channel.Add(queueName, value);
             }
 
-            s_channel[queueName].Reader.TryPeek(out var message);
-            return Task.FromResult((PeekedMessage?)message);
+            value.Reader.TryPeek(out var message);
+            return Task.FromResult((PeekedMessage)message);
         }
 
         public Task<IEnumerable<PeekedMessage>> PeekMessagesAsync(string queueName = "", int? maxMessages = null, CancellationToken cancellationToken = default)
         {
-            if (!s_channel.ContainsKey(queueName))
+            if (!s_channel.TryGetValue(queueName, out Channel<object> value))
             {
-                s_channel.Add(queueName, Channel.CreateUnbounded<object>());
+                value = Channel.CreateUnbounded<object>();
+                s_channel.Add(queueName, value);
             }
 
             var result = new List<PeekedMessage>();
-            while (s_channel[queueName].Reader.Count > 0)
+            while (value.Reader.Count > 0)
             {
-                s_channel[queueName].Reader.TryPeek(out var message);
+                value.Reader.TryPeek(out var message);
                 if (message != null)
                 {
                     result.Add((PeekedMessage)message);
@@ -46,29 +48,31 @@ namespace Gearbox.Core.Services
             return Task.FromResult(result.AsEnumerable());
         }
 
-        public Task<QueueMessage?> ReceiveMessageAsync(string queueName = "", TimeSpan? visibilityTimeout = null, CancellationToken cancellationToken = default)
+        public Task<QueueMessage> ReceiveMessageAsync(string queueName = "", TimeSpan? visibilityTimeout = null, CancellationToken cancellationToken = default)
         {
-            if (!s_channel.ContainsKey(queueName))
+            if (!s_channel.TryGetValue(queueName, out Channel<object> value))
             {
-                s_channel.Add(queueName, Channel.CreateUnbounded<object>());
+                value = Channel.CreateUnbounded<object>();
+                s_channel.Add(queueName, value);
             }
 
-            s_channel[queueName].Reader.TryRead(out var message);
+            value.Reader.TryRead(out var message);
 
-            return Task.FromResult((QueueMessage?)message);
+            return Task.FromResult((QueueMessage)message);
         }
 
         public Task<IEnumerable<QueueMessage>> ReceiveMessagesAsync(string queueName = "", int? maxMessages = null, TimeSpan? visibilityTimeout = null, CancellationToken cancellationToken = default)
         {
-            if (!s_channel.ContainsKey(queueName))
+            if (!s_channel.TryGetValue(queueName, out Channel<object> value))
             {
-                s_channel.Add(queueName, Channel.CreateUnbounded<object>());
+                value = Channel.CreateUnbounded<object>();
+                s_channel.Add(queueName, value);
             }
 
             var result = new List<QueueMessage>();
-            while (s_channel[queueName].Reader.Count > 0)
+            while (value.Reader.Count > 0)
             {
-                s_channel[queueName].Reader.TryRead(out var message);
+                value.Reader.TryRead(out var message);
                 if (message != null)
                 {
                     result.Add((QueueMessage)message);
@@ -78,11 +82,12 @@ namespace Gearbox.Core.Services
             return Task.FromResult(result.AsEnumerable());
         }
 
-        public Task<SendReceipt?> SendMessageAsync(string queueName = "", string content = "", CancellationToken cancellationToken = default)
+        public Task<SendReceipt> SendMessageAsync(string queueName = "", string content = "", CancellationToken cancellationToken = default)
         {
-            if (!s_channel.ContainsKey(queueName))
+            if (!s_channel.TryGetValue(queueName, out Channel<object> value))
             {
-                s_channel.Add(queueName, Channel.CreateUnbounded<object>());
+                value = Channel.CreateUnbounded<object>();
+                s_channel.Add(queueName, value);
             }
 
             var message = new QueueMessage(content)
@@ -90,9 +95,9 @@ namespace Gearbox.Core.Services
                 InsertedOn = DateTimeOffset.Now,
                 ExpiresOn = DateTimeOffset.Now.AddSeconds(ExpireOn)
             };
-            s_channel[queueName].Writer.TryWrite(message);
+            value.Writer.TryWrite(message);
 
-            return Task.FromResult<SendReceipt?>(new SendReceipt(message.MessageId, message.InsertedOn, message.ExpiresOn, message.NextVisibleOn){IsSuccess = true});
+            return Task.FromResult<SendReceipt>(new SendReceipt(message.MessageId, message.InsertedOn, message.ExpiresOn, message.NextVisibleOn) { IsSuccess = true });
         }
 
         public Task DeleteMessageAsync(QueueMessage message, string queueName = "", CancellationToken cancellationToken = default)

@@ -23,7 +23,7 @@ namespace Gearbox.Core.Services
             _logger = logger;
         }
 
-        public async Task<PeekedMessage?> PeekMessageAsync(string queueName = "", CancellationToken cancellationToken = default)
+        public async Task<PeekedMessage> PeekMessageAsync(string queueName = "", CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(queueName)) { return null; }
 
@@ -63,7 +63,7 @@ namespace Gearbox.Core.Services
             return collection;
         }
 
-        public async Task<QueueMessage?> ReceiveMessageAsync(string queueName = "", TimeSpan? visibilityTimeout = null, CancellationToken cancellationToken = default)
+        public async Task<QueueMessage> ReceiveMessageAsync(string queueName = "", TimeSpan? visibilityTimeout = null, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(queueName)) { return null; }
 
@@ -133,7 +133,7 @@ namespace Gearbox.Core.Services
             return await Task.FromResult(messages);
         }
 
-        public async Task<SendReceipt?> SendMessageAsync(string queueName = "", string content = "", CancellationToken cancellationToken = default)
+        public async Task<SendReceipt> SendMessageAsync(string queueName = "", string content = "", CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(queueName)) { return null; }
 
@@ -155,10 +155,10 @@ namespace Gearbox.Core.Services
                 _logger.LogError(e, "{Message}", e.Message);
             }
 
-            return await Task.FromResult(new SendReceipt(message.MessageId, message.InsertedOn, message.ExpiresOn, null){ IsSuccess = success});
+            return await Task.FromResult(new SendReceipt(message.MessageId, message.InsertedOn, message.ExpiresOn, null) { IsSuccess = success });
         }
 
-        public async Task DeleteMessageAsync(QueueMessage? message, string queueName = "", CancellationToken cancellationToken = default)
+        public async Task DeleteMessageAsync(QueueMessage message, string queueName = "", CancellationToken cancellationToken = default)
         {
             if (message == null || string.IsNullOrWhiteSpace(queueName)) { return; }
 

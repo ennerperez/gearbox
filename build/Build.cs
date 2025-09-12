@@ -7,9 +7,15 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text.Json;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ConfigurationSubstitution;
+using DotNetEnv;
+#if USING_DATABASE_PROVIDER
+using Microsoft.Extensions.Configuration;
+using Nuke.Common.Tools.EntityFramework;
+#endif
 using Nuke.Common;
 using Nuke.Common.Git;
 using Nuke.Common.IO;
@@ -20,7 +26,12 @@ using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.Git;
 using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Tools.MauiCheck;
+using Nuke.Common.Tools.ReportGenerator;
+#if USING_SONARQUBE
+using System.Text.Json;
+using Nuke.Common.Tools.DotCover;
 using Nuke.Common.Tools.SonarScanner;
+#endif
 using Nuke.Common.Utilities.Collections;
 using Serilog;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
@@ -38,6 +49,9 @@ public partial class Build : NukeBuild
     ///   - Microsoft VisualStudio     https://nuke.build/visualstudio
     ///   - Microsoft VSCode           https://nuke.build/vscode
     public static int Main() => Execute<Build>(x => x.Pack);
+
+    private const string EnvironmentProperty = "Environment";
+    private const string PlatformProperty = "Platform";
 
     #region Options
 
@@ -86,12 +100,12 @@ public partial class Build : NukeBuild
     public readonly GitRepository Repository;
 
     static AbsolutePath SourceDirectory => RootDirectory / "src";
-
-    static AbsolutePath TestsDirectory => RootDirectory / "test" / "results";
-
-    static AbsolutePath PublishDirectory => RootDirectory / "publish";
-
-    static AbsolutePath ArtifactsDirectory => RootDirectory / "output";
+    static AbsolutePath TestsDirectory => RootDirectory / "tests";
+    static AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+    static AbsolutePath TestResultsDirectory => ArtifactsDirectory / "test-results";
+    static AbsolutePath CoverageDirectory => ArtifactsDirectory / "coverage";
+    static AbsolutePath PublishDirectory => ArtifactsDirectory / "publish";
+    static AbsolutePath OutputDirectory => ArtifactsDirectory / "output";
 
     #endregion
 
@@ -109,7 +123,7 @@ public partial class Build : NukeBuild
     [Parameter]
     public readonly string PackageId;
 
-    GitVersion _version = null;
+    GitVersion _version;
 
     bool _useMaui;
     string _repoUrl = string.Empty;
@@ -133,18 +147,42 @@ public partial class Build : NukeBuild
 
     #endregion
 
+    Target Information => d => d
+        .DependsOn(Prepare)
+        .Executes(() =>
+        {
+            var envs = System.Environment.GetEnvironmentVariables();
+            Log.Information("Reading Environment");
+            foreach (var env in envs.Keys)
+            {
+                Log.Information($"{env}: {envs[env]}");
+            }
+        });
+
     Target Prepare => d => d
         .Before(Restore)
         .Executes(() =>
         {
+            var envFile = (RootDirectory / ".env");
+            if (envFile.Exists())
+            {
+                Log.Information("Reading .env file");
+                Env.Load(envFile);
+            }
+            else
+            {
+                Log.Warning(".env File not found");
+            }
+
             #region Projects
 
             _projects = Projects.Select(m => new
                 {
                     key = m.Split(":").FirstOrDefault(),
-                    value = m.Split(":").LastOrDefault()?.Split(",").ToArray()
+                    value = m.Split(":").LastOrDefault()?.Split(",")
                 })
-                .ToDictionary(k => k.key, v => v.value);
+                .GroupBy(m => m.key)
+                .ToDictionary(k => k.Key, v => v.SelectMany(m => m.value).ToArray());
 
             Log.Information("Reading projects");
             foreach (var item in Solution.AllProjects)
@@ -167,25 +205,18 @@ public partial class Build : NukeBuild
                 project.ReevaluateIfNecessary();
             }
 
-            _webProjects = _projects.ContainsKey("Web") ? Solution.AllProjects.Where(m => _projects["Web"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
-            _serviceProjects = _projects.ContainsKey("Service") ? Solution.AllProjects.Where(m => _projects["Service"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
-            _desktopProjects = _projects.ContainsKey("Desktop") ? Solution.AllProjects.Where(m => _projects["Desktop"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
-            _mobileProjects = _projects.ContainsKey("Mobile") ? Solution.AllProjects.Where(m => _projects["Mobile"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
-            _packageProjects = _projects.ContainsKey("Package") ? Solution.AllProjects.Where(m => _projects["Package"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
-            _testProjects = _projects.ContainsKey("Test") ? Solution.AllProjects.Where(m => _projects["Test"].Contains(m.Name)).ToArray() : Array.Empty<Project>();
+            _webProjects = _projects.TryGetValue("Web", out var project1) ? Solution.AllProjects.Where(m => project1.Contains(m.Name)).ToArray() : [];
+            _serviceProjects = _projects.TryGetValue("Service", out var project2) ? Solution.AllProjects.Where(m => project2.Contains(m.Name)).ToArray() : [];
+            _desktopProjects = _projects.TryGetValue("Desktop", out var project3) ? Solution.AllProjects.Where(m => project3.Contains(m.Name)).ToArray() : [];
+            _mobileProjects = _projects.TryGetValue("Mobile", out var project4) ? Solution.AllProjects.Where(m => project4.Contains(m.Name)).ToArray() : [];
+            _packageProjects = _projects.TryGetValue("Package", out var project5) ? Solution.AllProjects.Where(m => project5.Contains(m.Name)).ToArray() : [];
+            _testProjects = _projects.TryGetValue("Test", out var project6) ? Solution.AllProjects.Where(m => project6.Contains(m.Name)).ToArray() : [];
 
             #endregion
 
             #region Properties
 
-            using (var gitUrl = new Process())
-            {
-                gitUrl.StartInfo = new ProcessStartInfo(fileName: "git", arguments: "config --get remote.origin.url") { WorkingDirectory = SourceDirectory, RedirectStandardOutput = true, UseShellExecute = false };
-                gitUrl.Start();
-                _repoUrl = gitUrl.StandardOutput.ReadLine()?.Trim().Split(separator: " ", StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
-                gitUrl.WaitForExit();
-            }
-
+            _repoUrl = GitTasks.Git("config --get remote.origin.url", Repository.LocalDirectory ?? RootDirectory).StdToText();
             _useMaui = Solution.AllProjects.Select(m =>
             {
                 var evaluatedValue = m.GetMSBuildProject()?.GetProperty("UseMaui")?.EvaluatedValue;
@@ -212,7 +243,7 @@ public partial class Build : NukeBuild
         .Executes(() =>
         {
             Log.Information("Restoring tools");
-            DotNetToolRestore(s => s.SetProcessWorkingDirectory(SourceDirectory));
+            DotNetToolRestore(s => s.SetProcessWorkingDirectory(RootDirectory));
 
             try
             {
@@ -220,26 +251,6 @@ public partial class Build : NukeBuild
                 {
                     Log.Information("Checking for MAUI workload installation");
                     MauiCheckTasks.MauiCheck(c => c.SetNonInteractive(true));
-
-                    // var workloads = DotNet("workload list");
-                    // var isMauiInstalled = workloads.Any(x => x.Text.Contains("maui", StringComparison.OrdinalIgnoreCase));
-                    // if (!isMauiInstalled)
-                    // {
-                    //     Log.Information("Installing MAUI workload...");
-                    //     var workloadId = "maui-mobile";
-                    //     if (Platform.Contains("Android"))
-                    //     {
-                    //         workloadId = "maui-android";
-                    //     }
-                    //     else if (Platform.Contains("iPhone"))
-                    //     {
-                    //         workloadId = "maui-ios";
-                    //     }
-                    //
-                    //     DotNetWorkloadInstall(options =>
-                    //         options.SetWorkloadId(workloadId)
-                    //     );
-                    // }
                 }
             }
             catch (Exception ex)
@@ -253,7 +264,8 @@ public partial class Build : NukeBuild
                 .SetWarningLevel(WarningLevel)
                 .SetVerbosity(getDotNetVerbosity())
                 .SetPlatform(Platform)
-                .SetConfigFile(RootDirectory / "nuget.config")
+                .SetConfigFile(RootDirectory / "NuGet.config")
+                .SetProperty(EnvironmentProperty, Environment)
                 .CombineWith(Solution.AllProjects, (x, v) => x
                     .SetProjectFile(v)));
         });
@@ -265,8 +277,7 @@ public partial class Build : NukeBuild
             Log.Information("Cleaning Output Directories");
             SourceDirectory.GlobDirectories("**/bin", "**/obj").ForEach((path) => path.DeleteDirectory());
             TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach((path) => path.DeleteDirectory());
-            Log.Information("Cleaning Publish Directory");
-            AbsolutePath.Create(PublishDirectory).CreateOrCleanDirectory();
+
             Log.Information("Cleaning Artifacts Directory");
             AbsolutePath.Create(ArtifactsDirectory).CreateOrCleanDirectory();
 
@@ -297,7 +308,7 @@ public partial class Build : NukeBuild
             var assemblyInfoFiles = SourceDirectory.GetFiles("AssemblyInfo*.cs", int.MaxValue);
             foreach (var assemblyInfoVersionFile in assemblyInfoFiles)
             {
-                Log.Information(messageTemplate: "Patching: {File}", assemblyInfoVersionFile);
+                Log.Information("Patching: {File}", assemblyInfoVersionFile);
 
                 var content = File.ReadAllText(assemblyInfoVersionFile);
                 content = AssemblyVersionRegex().Replace(content, $"[assembly: AssemblyVersion(\"{_version.AssemblySemVer}\")]");
@@ -319,8 +330,8 @@ public partial class Build : NukeBuild
             }
             else
             {
-                Log.Information($"ApplicationVersion: {_version.AssemblySemVer}");
-                Log.Information($"ApplicationDisplayVersion: {_version.FullSemVer}");
+                Log.Information("ApplicationVersion: {AssemblySemVer}", _version.AssemblySemVer);
+                Log.Information("ApplicationDisplayVersion: {FullSemVer}", _version.FullSemVer);
             }
 
             var items = loadPublishProjects();
@@ -352,7 +363,7 @@ public partial class Build : NukeBuild
             if (_useMaui)
             {
                 target = from item in target
-                    where (item.framework.Contains("ios", StringComparison.OrdinalIgnoreCase) && Platform.Contains("iPhone", StringComparison.InvariantCultureIgnoreCase)) ||
+                    where item.framework.Contains("ios", StringComparison.OrdinalIgnoreCase) && Platform.Contains("iPhone", StringComparison.InvariantCultureIgnoreCase) ||
                           item.framework.Contains("android", StringComparison.OrdinalIgnoreCase) && Platform.Contains("Android", StringComparison.InvariantCultureIgnoreCase)
                     select new { item.framework, item.project };
 
@@ -361,7 +372,7 @@ public partial class Build : NukeBuild
                     .SetWarningLevel(WarningLevel)
                     .SetVerbosity(getDotNetVerbosity())
                     .SetConfiguration(Configuration)
-                    .SetProperty("Environment", Environment.ToString())
+                    .SetProperty(EnvironmentProperty, Environment)
                     .EnableNoRestore()
                     .CombineWith(target, configurator: (x, v) => x
                         .SetProjectFile(v.project.Path)
@@ -378,7 +389,7 @@ public partial class Build : NukeBuild
                 .SetWarningLevel(WarningLevel)
                 .SetVerbosity(getDotNetVerbosity())
                 .SetConfiguration(Configuration)
-                .SetProperty("Environment", Environment.ToString())
+                .SetProperty(EnvironmentProperty, Environment)
                 .EnableNoRestore()
                 .CombineWith(target, configurator: (x, v) => x
                     .SetProjectFile(v.project.Path)
@@ -389,20 +400,21 @@ public partial class Build : NukeBuild
         .DependsOn(Compile)
         .Executes(() =>
         {
-            if (!_testProjects.Any())
+            if (_testProjects.Length == 0)
             {
                 throw new OperationCanceledException("No tests found");
             }
 
-            AbsolutePath.Create(TestsDirectory).CreateOrCleanDirectory();
-
-            DotNetBuild(c => c.SetProjectFile(Solution.Path));
+            DotNetBuild(c => c
+                .SetNoIncremental(true)
+                .SetProjectFile(Solution.Path)
+            );
 
             DotNetTest(s => s
+                .SetVerbosity(getDotNetVerbosity())
                 .EnableNoRestore()
                 .EnableNoBuild()
-                .SetConfiguration(Configuration)
-                .SetResultsDirectory(TestsDirectory)
+                .SetResultsDirectory(TestResultsDirectory)
                 .SetCollectCoverage(true)
                 .SetCoverletOutputFormat(CoverletOutputFormat.cobertura)
                 .SetLoggers("trx", "html")
@@ -410,29 +422,15 @@ public partial class Build : NukeBuild
                 .CombineWith(_testProjects, configurator: (x, v) => x
                     .SetProjectFile(v.Path)));
 
-            // var covertura = TestsDirectory.GlobFiles("**/coverage.cobertura.xml");
-            //
-            // ReportGeneratorTasks.ReportGenerator(r => r
-            //     .CombineWith(covertura, (s, p) => s
-            //         .SetReports(p)
-            //         .SetTargetDirectory(TestsDirectory)
-            //         .SetReportTypes(ReportTypes.Html, ReportTypes.Cobertura, ReportTypes.MarkdownSummary, ReportTypes.SonarQube)
-            //     ));
-        });
+            ReportGeneratorTasks.ReportGenerator(s => s
+                .SetReports($"{TestResultsDirectory}/**/coverage.cobertura.xml")
+                .SetAssemblyFilters("+*")
+                .SetFileFilters("+*")
+                .SetReportTypes("cobertura;html;teamcitysummary")
+                .SetTargetDirectory(TestResultsDirectory / "reports")
+            );
 
-    Target UITest => d => d
-        .DependsOn(Compile)
-        .Executes(() =>
-        {
-            DotNetToolRestore(s => s.SetProcessWorkingDirectory(SourceDirectory));
-
-            var testsProjects = _testProjects.Where(m => m.Name.Contains("UI", StringComparison.OrdinalIgnoreCase)).ToArray();
-
-            DotNetTest(s => s
-                .SetVerbosity(getDotNetVerbosity())
-                .SetConfiguration(Configuration)
-                .CombineWith(testsProjects, configurator: (x, v) => x
-                    .SetProjectFile(v.Path)));
+            DotNet($"trx2junit {TestResultsDirectory}/*.trx");
         });
 
     Target Publish => d => d
@@ -440,6 +438,7 @@ public partial class Build : NukeBuild
         .DependsOn(Prepare)
         .DependsOn(Restore)
         .DependsOn(Versioning)
+        .DependsOn(Compile)
         .Executes(() =>
         {
             var items = loadPublishProjects();
@@ -450,19 +449,19 @@ public partial class Build : NukeBuild
             if (_useMaui)
             {
                 publishProjects = from item in publishProjects
-                    where (item.framework.Contains("ios", StringComparison.OrdinalIgnoreCase) && Platform.Contains("iPhone", StringComparison.InvariantCultureIgnoreCase)) ||
+                    where item.framework.Contains("ios", StringComparison.OrdinalIgnoreCase) && Platform.Contains("iPhone", StringComparison.InvariantCultureIgnoreCase) ||
                           item.framework.Contains("android", StringComparison.OrdinalIgnoreCase) && Platform.Contains("Android", StringComparison.InvariantCultureIgnoreCase)
                     select new { item.project, item.framework };
             }
 
-            var hasWeb = (_projects.ContainsKey("Web") && _projects["Web"].Any());
-            var hasService = (_projects.ContainsKey("Service") && _projects["Service"].Any());
-            var hasMobile = (_projects.ContainsKey("Mobile") && _projects["Mobile"].Any());
-            var hasDesktop = (_projects.ContainsKey("Desktop") && _projects["Desktop"].Any());
-            var hasPackage = (_projects.ContainsKey("Package") && _projects["Package"].Any());
+            (bool hasWeb, bool hasService, bool hasMobile, bool hasDesktop, bool hasPackage) = GetProjectPresenceFlags();
 
             if (hasWeb || hasService)
             {
+                publishProjects = publishProjects.Where(m =>
+                    _webProjects.Select(p => p.Name).Contains(m.project.Name) ||
+                    _serviceProjects.Select(p => p.Name).Contains(m.project.Name)
+                ).ToArray();
                 DotNetPublish(s => s
                     .SetWarningLevel(WarningLevel)
                     .SetVerbosity(getDotNetVerbosity())
@@ -473,10 +472,13 @@ public partial class Build : NukeBuild
                     .CombineWith(publishProjects, configurator: (x, v) => x
                         .SetProject(v.project)
                         .SetFramework(v.framework)
-                        .SetOutput($"{PublishDirectory}/{v.project.Name}")));
+                        .SetOutput(PublishDirectory / v.project.Name)));
             }
             else if (hasMobile)
             {
+                publishProjects = publishProjects.Where(m =>
+                    _mobileProjects.Select(p => p.Name).Contains(m.project.Name)
+                ).ToArray();
                 DotNetPublish(s => s
                     .SetWarningLevel(WarningLevel)
                     .SetVerbosity(getDotNetVerbosity())
@@ -492,7 +494,7 @@ public partial class Build : NukeBuild
                         .When(w => w.Framework.Contains("android", StringComparison.OrdinalIgnoreCase), c => c.SetProperty("RuntimeIdentifier", "android-arm64"))
                         .When(w => w.Framework.Contains("android", StringComparison.OrdinalIgnoreCase) && PackageSigning, (c) => c
                             .SetProperty("AndroidKeyStore", true)
-                            .SetProperty("AndroidSigningKeyStore", SourceDirectory / ".certs" / v.project.Name + ".keystore")
+                            .SetProperty("AndroidSigningKeyStore", SourceDirectory / ".certs" / $"{v.project.Name}.keystore")
                             .SetProperty("AndroidSigningKeyAlias", AndroidSigningKeyAlias)
                             .SetProperty("AndroidSigningKeyPass", AndroidSigningKeyPass)
                             .SetProperty("AndroidSigningStorePass", AndroidSigningStorePass)
@@ -502,6 +504,9 @@ public partial class Build : NukeBuild
             }
             else if (hasDesktop)
             {
+                publishProjects = publishProjects.Where(m =>
+                    _desktopProjects.Select(p => p.Name).Contains(m.project.Name)
+                ).ToArray();
                 DotNetPublish(s => s
                     .SetWarningLevel(WarningLevel)
                     .SetVerbosity(getDotNetVerbosity())
@@ -511,10 +516,13 @@ public partial class Build : NukeBuild
                         .When(_ => _useMaui, y => y.SetPlatform(Platform))
                         .SetProject(v.project)
                         .SetFramework(v.framework)
-                        .SetOutput($"{PublishDirectory}/{v.project.Name}")));
+                        .SetOutput(PublishDirectory / v.project.Name)));
             }
             else if (hasPackage)
             {
+                publishProjects = publishProjects.Where(m =>
+                    _packageProjects.Select(p => p.Name).Contains(m.project.Name)
+                ).ToArray();
                 foreach (var item in publishProjects)
                 {
                     var projectInfo = Solution.AllProjects.FirstOrDefault(p => p.Name == item.project.Name);
@@ -526,15 +534,13 @@ public partial class Build : NukeBuild
                             .SetProject(projectInfo)
                             .SetConfiguration(Configuration)
                             .AddProperty("Icon", ".editoricon.png")
-                            //.SetVersion($"{_version:3}{(!string.IsNullOrWhiteSpace(_versionTag) ? $"-{_versionTag}" : "")}")
                             .SetTitle($"{Product} {projectInfo.Name}")
                             .SetAuthors(Author)
                             .SetDescription($"{Product} {projectInfo.Name}")
                             .SetCopyright($"Copyright \u00a9 {Author}")
-                            //.SetVersionSuffix(_version.ToString(3))
                             .SetRepositoryUrl(_repoUrl)
                             .SetRepositoryType("git")
-                            .SetOutputDirectory($"{PublishDirectory}/{item.project.Name}"));
+                            .SetOutputDirectory(PublishDirectory / item.project.Name));
                     }
                     else
                     {
@@ -558,86 +564,68 @@ public partial class Build : NukeBuild
             if (_useMaui)
             {
                 target = from item in target
-                    where (item.framework.Contains("ios", StringComparison.OrdinalIgnoreCase) && Platform.Contains("iPhone", StringComparison.InvariantCultureIgnoreCase)) ||
+                    where item.framework.Contains("ios", StringComparison.OrdinalIgnoreCase) && Platform.Contains("iPhone", StringComparison.InvariantCultureIgnoreCase) ||
                           item.framework.Contains("android", StringComparison.OrdinalIgnoreCase) && Platform.Contains("Android", StringComparison.InvariantCultureIgnoreCase)
                     select new { item.framework, item.project };
 
                 if (!PackageSigning)
                 {
-                    ArtifactsDirectory.GlobFiles($"**/*-android/*Signed.{_androidExt}").DeleteFiles();
+                    OutputDirectory.GlobFiles($"**/*-android/*Signed.{_androidExt}").DeleteFiles();
                 }
             }
 
-#if USING_EFCORE
-            if (Project.StartsWith("Web") || Project.StartsWith("Service") || Project.StartsWith("Package"))
+            (bool hasWeb, bool hasService, bool hasMobile, bool hasDesktop, bool hasPackage) = GetProjectPresenceFlags();
+
+#if USING_DATABASE_PROVIDER
+
+            if (hasWeb || hasService || hasPackage)
             {
-                var startupPath = Startup?.Directory ?? string.Empty;
-
-                var config = new ConfigurationBuilder()
-                    .AddJsonFile(Path.Combine(startupPath, "appsettings.json"), false, true)
-                    .AddJsonFile(Path.Combine(startupPath, $"appsettings.{Environment}.json"), true, true)
-                    .Build();
-
-                var connectionStrings = new Dictionary<string, string>();
-                config.Bind(key: "ConnectionStrings", connectionStrings);
-
-                var contexts = (from item in connectionStrings
-                        let split = item.Key.Split(".")
-                        where split.Length > 1
-                        let context = split.First()
-                        let provider = split.Last()
-                        select new { Context = context, Name = context.Replace(oldValue: "Context", newValue: ""), Provider = provider, item.Value })
-                    .ToArray();
-
-                var scriptDir = Path.Combine(ArtifactsDirectory, "scripts");
-                if (!Directory.Exists(scriptDir))
+                if (Startup != null && Target != null)
                 {
-                    Directory.CreateDirectory(scriptDir);
-                }
+                    var scriptsDir = (OutputDirectory / "scripts");
+                    scriptsDir.CreateDirectory();
 
-                foreach (var item in contexts.Where(m => m.Provider != "Sqlite"))
-                {
-                    if (Startup == null || Persistence == null) continue;
-                    var scripfile = Path.Combine(ArtifactsDirectory, "scripts", $"{item.Name}_{item.Provider}_{DateTime.Now:yyyyMMdd}.sql");
-                    if (File.Exists(scripfile))
+                    var bundlesDir = (OutputDirectory / "bundles");
+                    bundlesDir.CreateDirectory();
+
+                    var stamp = DateTime.UtcNow.ToString("yyyyMMdd");
+
+                    var combinations = GetConnectionStringsCombinations()
+                        .Where(IsDbContextRecord);
+
+                    foreach (var item in combinations)
                     {
-                        File.Delete(scripfile);
+                        if (!string.Equals(item.Provider, "Sqlite", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var scriptFile = (scriptsDir / $"{item.Provider}_{item.Name}_{stamp}.sql");
+                            scriptFile.DeleteFile();
+
+                            EntityFrameworkTasks.EntityFrameworkMigrationsScript(c => c
+                                .SetProcessWorkingDirectory(RootDirectory)
+                                .EnableIdempotent()
+                                .SetProject(Target)
+                                .SetStartupProject(Startup)
+                                .SetContext(item.Name)
+                                .SetOutput(scriptFile)
+                            );
+                        }
+                        else if (string.Equals(item.Provider, "Sqlite", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var databaseFile = (bundlesDir / $"{item.Provider}_{item.Name}_{stamp}.db");
+                            databaseFile.DeleteFile();
+
+                            EntityFrameworkTasks.EntityFrameworkDatabaseUpdate(c => c
+                                .SetProcessWorkingDirectory(RootDirectory)
+                                .SetProject(Target)
+                                .SetStartupProject(Startup)
+                                .SetContext(item.Name)
+                                .SetConnection($"Data Source={databaseFile}")
+                            );
+                        }
                     }
-
-                    DotNetEf(_ => new MigrationsSettings(Migrations.Script)
-                        .EnableIdempotent()
-                        .SetProjectFile(Persistence.Path)
-                        .SetStartupProjectFile(Startup.Path)
-                        .SetContext(item.Context)
-                        .SetOutput(scripfile)
-                    );
-                }
-
-                var bundlesDir = Path.Combine(ArtifactsDirectory, "bundles");
-                if (!Directory.Exists(bundlesDir))
-                {
-                    Directory.CreateDirectory(bundlesDir);
-                }
-
-                foreach (var item in contexts.Where(m => m.Provider == "Sqlite"))
-                {
-                    if (Startup == null || Persistence == null) continue;
-                    var databasefile = Path.Combine(bundlesDir, $"{item.Name}_{item.Provider}_{DateTime.Now:yyyyMMdd}.db");
-                    DotNetEf(_ => new DatabaseSettings(Database.Update)
-                        .SetConnection($"Data Source={databasefile}")
-                        .SetProjectFile(Persistence.Path)
-                        .SetStartupProjectFile(Startup.Path)
-                        .SetContext(item.Context)
-                    );
                 }
             }
 #endif
-
-            var hasWeb = (_projects.ContainsKey("Web") && _projects["Web"].Any());
-            var hasService = (_projects.ContainsKey("Service") && _projects["Service"].Any());
-            var hasMobile = (_projects.ContainsKey("Mobile") && _projects["Mobile"].Any());
-            var hasDesktop = (_projects.ContainsKey("Desktop") && _projects["Desktop"].Any());
-            var hasPackage = (_projects.ContainsKey("Package") && _projects["Package"].Any());
 
             foreach (var item in target)
             {
@@ -646,18 +634,18 @@ public partial class Build : NukeBuild
 #if USING_7ZIP
                     if (OperatingSystem.IsWindows())
                     {
-                        AbsolutePathExtensions.DeleteFile($"{ArtifactsDirectory}/{item.project.Name}.exe");
+                        AbsolutePathExtensions.DeleteFile($"{OutputDirectory}/{item.project.Name}.exe");
                         SevenZip.SevenZipBase.SetLibraryPath(Solution.Directory / ".build" / "7za.bin");
                         var compressor = new SevenZip.SevenZipCompressor();
-                        compressor.CompressDirectory(Path.Combine(PublishDirectory, item.project.Name), Path.Combine(ArtifactsDirectory, $"{item.project.Name}.7z"));
+                        compressor.CompressDirectory(Path.Combine(PublishDirectory, item.project.Name), Path.Combine(OutputDirectory, $"{item.project.Name}.7z"));
 
                         var configs = new[] { ";!@Install@!UTF-8!", $"Title=\"{Product} {item.project.Name}\"", $"ExecuteFile=\"{item.project.Name}.exe\"", ";!@InstallEnd@!" };
                         var array1 = File.ReadAllBytes(Solution.Directory / ".build" / $"{Product}.sfx");
                         var array2 = Encoding.UTF8.GetBytes(string.Join(System.Environment.NewLine, configs));
-                        var array3 = File.ReadAllBytes($"{ArtifactsDirectory / item.project.Name}.7z");
+                        var array3 = File.ReadAllBytes($"{OutputDirectory / item.project.Name}.7z");
                         var data = array1.Concat(array2).Concat(array3).ToArray();
-                        File.WriteAllBytes($"{ArtifactsDirectory}/{item.project.Name}.exe", data);
-                        AbsolutePathExtensions.DeleteFile($"{ArtifactsDirectory}/{item.project.Name}.7z");
+                        File.WriteAllBytes($"{OutputDirectory}/{item.project.Name}.exe", data);
+                        AbsolutePathExtensions.DeleteFile($"{OutputDirectory}/{item.project.Name}.7z");
                     }
                     else
                     {
@@ -677,66 +665,69 @@ public partial class Build : NukeBuild
                         File.Copy(file.ToString(), notesPath / file.Name);
                     }
 
-                    AbsolutePath.Create(ArtifactsDirectory / "Android").CreateOrCleanDirectory();
-                    AbsolutePath.Create(ArtifactsDirectory / "iOS").CreateOrCleanDirectory();
+                    AbsolutePath.Create(OutputDirectory / "Android").CreateOrCleanDirectory();
+                    AbsolutePath.Create(OutputDirectory / "iOS").CreateOrCleanDirectory();
 
                     PublishDirectory.GlobFiles($"**/*-android/*{(PackageSigning ? "-Signed" : string.Empty)}.{_androidExt}").ForEach(x => x.MoveToDirectory(ArtifactsDirectory / "Android"));
-                    PublishDirectory.GlobFiles($"**/*-ios/*.{_iOSExt}").ForEach(x => x.MoveToDirectory(ArtifactsDirectory / "iOS"));
+                    PublishDirectory.GlobFiles($"**/*-ios/*.{_iOSExt}").ForEach(x => x.MoveToDirectory(OutputDirectory / "iOS"));
 
                     // R8 Mapping
-                    PublishDirectory.GlobFiles($"**/*-android/mapping.txt").ForEach(x => x.MoveToDirectory(ArtifactsDirectory / "Android"));
+                    PublishDirectory.GlobFiles($"**/*-android/mapping.txt").ForEach(x => x.MoveToDirectory(OutputDirectory / "Android"));
 
                     // Changes
                     PublishDirectory.GlobFiles($"**/*-android/Notes/CHANGES").ForEach(x =>
                     {
-                        (ArtifactsDirectory / "Android" / "Notes").CreateDirectory();
-                        x.MoveToDirectory(ArtifactsDirectory / "Android" / "Notes");
+                        (OutputDirectory / "Android" / "Notes").CreateDirectory();
+                        x.MoveToDirectory(OutputDirectory / "Android" / "Notes");
                     });
                     PublishDirectory.GlobFiles($"**/*-ios/Notes/*.*.txt").ForEach(x =>
                     {
-                        (ArtifactsDirectory / "iOS" / "Notes").CreateDirectory();
-                        x.MoveToDirectory(ArtifactsDirectory / "iOS" / "Notes");
+                        (OutputDirectory / "iOS" / "Notes").CreateDirectory();
+                        x.MoveToDirectory(OutputDirectory / "iOS" / "Notes");
                     });
 
                     //Rename Packages
-                    (ArtifactsDirectory / "Android").GlobFiles($"*.{_androidExt}").FirstOrDefault()?.RenameWithoutExtension($"{PackageId}", ExistsPolicy.FileOverwrite);
-                    (ArtifactsDirectory / "iOS" / "").GlobFiles($"*.{_iOSExt}").FirstOrDefault()?.RenameWithoutExtension($"{PackageId}", ExistsPolicy.FileOverwrite);
+                    (OutputDirectory / "Android").GlobFiles($"*.{_androidExt}").FirstOrDefault()?.RenameWithoutExtension($"{PackageId}", ExistsPolicy.FileOverwrite);
+                    (OutputDirectory / "iOS" / "").GlobFiles($"*.{_iOSExt}").FirstOrDefault()?.RenameWithoutExtension($"{PackageId}", ExistsPolicy.FileOverwrite);
                 }
                 else if (hasWeb || hasService)
                 {
-                    AbsolutePathExtensions.DeleteFile($"{ArtifactsDirectory}/{item.project.Name}.zip");
-                    ZipFile.CreateFromDirectory($"{PublishDirectory}/{item.project.Name}", $"{ArtifactsDirectory}/{item.project.Name}.zip");
+                    if (!_webProjects.Select(m => m.Name).Contains(item.project.Name) && !_serviceProjects.Select(m => m.Name).Contains(item.project.Name))
+                    {
+                        continue;
+                    }
+
+                    (OutputDirectory / $"{item.project.Name}.zip").DeleteFile();
+                    (PublishDirectory / $"{item.project.Name}" / ".env").DeleteFile();
+                    ZipFile.CreateFromDirectory(PublishDirectory / item.project.Name, OutputDirectory / $"{item.project.Name}.zip");
                 }
                 else if (hasPackage)
                 {
                     var packageId = item.project.GetProperty("PackageId");
-                    AbsolutePathExtensions.DeleteFile($"{ArtifactsDirectory}/{packageId}.*.nupkg");
-                    var nugets = AbsolutePathExtensions.GetFiles($"{PublishDirectory}/{item.project.Name}/", $"{packageId}.*.nupkg");
+                    (OutputDirectory / $"{packageId}.*.nupkg").DeleteFile();
+                    var nugets = (PublishDirectory / item.project.Name / $"{packageId}.*.nupkg").GetFiles();
                     foreach (var nuget in nugets)
                     {
-                        var fileName = $"{ArtifactsDirectory}/{nuget.Name}";
-                        if (File.Exists(fileName))
-                        {
-                            File.Delete(fileName);
-                        }
-
-                        nuget.Move(fileName);
+                        (OutputDirectory / nuget.Name).DeleteFile();
+                        nuget.Move((OutputDirectory / nuget.Name), ExistsPolicy.FileOverwrite);
                     }
                 }
             }
 
-            Log.Information("Output: {ArtifactsDirectory}", ArtifactsDirectory);
+            Log.Information("Output: {OutputDirectory}", OutputDirectory);
             return Task.CompletedTask;
         });
 
     Target Analyze => d => d
-        .After(Restore)
+        .DependsOn(Clean)
+        .DependsOn(Prepare)
+        .DependsOn(Restore)
         .Executes(() =>
         {
 #if USING_SONARQUBE
-            var lintFile = Path.Combine(RootDirectory, ".sonarlint", Solution.Name + ".json");
+            var lintFile = (RootDirectory / ".sonarlint" / $"{Solution.Name}.json");
             SonarLint lint;
-            if (File.Exists(lintFile))
+            if (lintFile.Exists())
             {
                 lint = JsonSerializer.Deserialize<SonarLint>(File.ReadAllText(lintFile));
             }
@@ -752,17 +743,27 @@ public partial class Build : NukeBuild
             if (lint != null)
             {
                 SonarScannerTasks.SonarScannerBegin(s => s
+                    .SetProcessWorkingDirectory(Solution.Directory)
                     .SetProjectKey(lint.projectKey)
                     .SetToken(lint.sonarQubeToken)
                     .SetAdditionalParameter("sonar.host.url", lint.sonarQubeUri)
-                    .SetAdditionalParameter("sonar.exclusions", "**/.sonarlint/*.*")
-                    .SetAdditionalParameter("sonar.cs.vscoveragexml.reportsPaths", TestsDirectory / "coverage" / "coverage.xml")
+                    .SetAdditionalParameter("sonar.exclusions", "**/.sonarlint/*.*, **/.nuke/*.*")
+                    .SetAdditionalParameter("sonar.cs.vscoveragexml.reportsPaths", CoverageDirectory / "coverage.xml")
                 );
-                DotNetBuild(s => s.SetProjectFile(Solution));
-                // DotCoverTasks.DotCoverCover(c => c
-                //     .SetReportType(DotCoverReportType.Xml)
-                //     .SetOutputFile(TestsDirectory / "coverage" / "coverage.xml")
-                // );
+
+                DotNetBuild(c => c
+                    .SetNoIncremental(true)
+                    .SetProjectFile(Solution.Path)
+                );
+
+                DotNetToolInstall(s => s
+                    .SetPackageName("dotnet-coverage")
+                    .SetGlobal(true)
+                );
+
+                Process.Start("dotnet-coverage",
+                    $"collect \"dotnet test {Solution.FileName} --no-build --no-restore\" -f xml -o \"{(CoverageDirectory / "coverage.xml")}\"")?.WaitForExit();
+
                 SonarScannerTasks.SonarScannerEnd(s => s
                     .SetToken(lint.sonarQubeToken)
                 );
@@ -774,27 +775,34 @@ public partial class Build : NukeBuild
 #endif
         });
 
-    record PublishProjectRecord(Project project, bool useMaui);
+    private record PublishProjectRecord(Project project, bool useMaui);
 
     private PublishProjectRecord[] loadPublishProjects()
     {
-        foreach (var item in Solution.Projects)
+        var items = Solution.AllProjects
+            .Where(m => !m.Name.StartsWith("_"))
+            .ToArray();
+        var projects = items
+            .Select(m => new { Project = m, Info = m.GetMSBuildProject() })
+            .ToArray();
+        var result = new List<PublishProjectRecord>();
+
+        foreach (var item in projects)
         {
-            var project = item.GetMSBuildProject();
-            var options = project.Imports.FirstOrDefault(m => m.ImportedProject.EscapedFullPath.EndsWith("Options.props"));
+            var options = item.Info.Imports.FirstOrDefault(m => m.ImportedProject.EscapedFullPath.EndsWith("Options.props"));
             if (options.ImportedProject != null)
             {
                 // Variables
-                var pg1 = options.ImportedProject.PropertyGroups.FirstOrDefault(m => m.Label == "Environment");
+                var pg1 = options.ImportedProject.PropertyGroups.FirstOrDefault(m => m.Label == EnvironmentProperty);
                 if (pg1 != null)
                 {
-                    pg1.SetProperty("Environment", Environment.ToString());
-                    pg1.SetProperty("Platform", Platform);
+                    pg1.SetProperty(EnvironmentProperty, Environment);
+                    pg1.SetProperty(PlatformProperty, Platform);
                 }
                 else
                 {
-                    options.ImportedProject.AddProperty("Environment", Environment.ToString());
-                    options.ImportedProject.AddProperty("Platform", Platform);
+                    options.ImportedProject.AddProperty(EnvironmentProperty, Environment);
+                    options.ImportedProject.AddProperty(PlatformProperty, Platform);
                 }
 
                 if (options.ImportedProject.HasUnsavedChanges)
@@ -806,29 +814,32 @@ public partial class Build : NukeBuild
             }
             else
             {
-                project.SetProperty("Environment", Environment.ToString());
-                project.SetProperty("Platform", Platform);
-                project.Save();
+                item.Info.SetProperty(EnvironmentProperty, Environment);
+                item.Info.SetProperty(PlatformProperty, Platform);
+                item.Info.Save();
             }
 
-            project.ReevaluateIfNecessary();
+            item.Info.ReevaluateIfNecessary();
+            var useMaui = item.Info.GetPropertyValue("UseMaui");
+            result.Add(new PublishProjectRecord(item.Project, !string.IsNullOrWhiteSpace(useMaui) && bool.Parse(useMaui)));
         }
 
-        var internalProjects = (from project in Solution.Projects
-            let info = project.GetMSBuildProject()
-            let useMaui = info.GetPropertyValue("UseMaui")
-            select new PublishProjectRecord(
-                project, !string.IsNullOrWhiteSpace(useMaui) && bool.Parse(useMaui)
-            )).ToArray();
-
-        return internalProjects;
+        return result.ToArray();
     }
 
 #if USING_SONARQUBE
     private record SonarLint(string sonarQubeUri, string sonarQubeToken, string projectKey);
 #endif
 
-    private DotNetVerbosity getDotNetVerbosity()
+    private (bool hasWeb, bool hasService, bool hasMobile, bool hasDesktop, bool hasPackage)
+        GetProjectPresenceFlags() =>
+        (_webProjects?.Length > 0,
+            _serviceProjects?.Length > 0,
+            _mobileProjects?.Length > 0,
+            _desktopProjects?.Length > 0,
+            _packageProjects?.Length > 0);
+
+    private static DotNetVerbosity getDotNetVerbosity()
     {
         return Verbosity switch
         {

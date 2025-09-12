@@ -22,6 +22,7 @@ namespace Gearbox.Core.Natives.Windows.Interop
         }
 
         [DllImport("ntdll")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories)]
         internal static extern int RtlGetVersion(ref RTL_OSVERSIONINFOEX lpVersionInformation);
     }
 }

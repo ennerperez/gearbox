@@ -1,4 +1,5 @@
-﻿using Gearbox.Core.Models;
+﻿using System;
+using Gearbox.Core.Models;
 using Shouldly;
 
 namespace Gearbox.UnitTest.Core.Models
@@ -6,7 +7,7 @@ namespace Gearbox.UnitTest.Core.Models
     public class PeekedMessageTest
     {
         [Fact]
-        public void Should_Create_A_New_PeekedMessage()
+        public void ShouldCreateANewPeekedMessage()
         {
             var messageId = "test-message-id";
             var body = "This is a test message."u8.ToArray();

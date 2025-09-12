@@ -17,7 +17,7 @@ using WindowsNotificationManager = Gearbox.Shell.Services.WindowsNotificationMan
 
 namespace Gearbox.Shell
 {
-    public static partial class Extensions
+    public static partial class DependencyInjectionExtensions
     {
         public static IServiceCollection RegisterViews(this IServiceCollection services)
         {
@@ -58,7 +58,7 @@ namespace Gearbox.Shell
             return services;
         }
 
-        public static AppBuilder? WithDesktopNotifications(this AppBuilder? builder)
+        public static AppBuilder WithDesktopNotifications(this AppBuilder builder)
         {
             if (Program.Services == null)
             {
@@ -92,7 +92,7 @@ namespace Gearbox.Shell
                 var url = forceSourceCommandRegexMatch.Groups[1].Value;
                 var source = forceSourceCommandRegexMatch.Groups[2].Value;
                 if (browserService == null) { throw new OperationCanceledException("Browser Service was not found"); }
-                await browserService.LaunchAsync(url, source);
+                await browserService.LaunchAsync(new Uri(url), source);
                 Environment.Exit(0);
             }
             else if (registerCommandRegexMatch.Success)
@@ -110,7 +110,7 @@ namespace Gearbox.Shell
             else
             {
                 if (browserService == null) { throw new OperationCanceledException("Browser Service was not found"); }
-                await browserService.LaunchAsync(arg);
+                await browserService.LaunchAsync(new Uri(arg));
                 Environment.Exit(0);
             }
 

@@ -1,5 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using Gearbox.Core.Interfaces;
 using Gearbox.Core.Services;
 using Microsoft.Extensions.Configuration;
@@ -37,7 +40,7 @@ namespace Gearbox.UnitTest.Core.Services
         [InlineData("https://google.com")]
         [InlineData("https://youtube.com")]
         [InlineData("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")]
-        public async Task LaunchUrlByBrowserAsync(string url)
+        public async Task LaunchUrlByBrowserAsync(Uri url)
         {
             var result = await _browserService.LaunchAsync(url);
             result.ShouldBeTrue();
@@ -46,7 +49,7 @@ namespace Gearbox.UnitTest.Core.Services
         [Theory]
         [InlineData("https://google.com", "Discord")]
         [InlineData("https://youtube.com", "Microsoft Teams")]
-        public async Task LaunchUrlBySourceAsync(string url, string window)
+        public async Task LaunchUrlBySourceAsync(Uri url, string window)
         {
             var result = await _browserService.LaunchAsync(url, window);
             result.ShouldBeTrue();

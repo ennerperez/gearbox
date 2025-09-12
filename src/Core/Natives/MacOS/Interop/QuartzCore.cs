@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -23,12 +24,12 @@ namespace Gearbox.Core.Natives.MacOS.Interop
         internal class KCgWindow
         {
             internal uint KCgWindowAlpha;
-            internal KCgWindowBounds? KCgWindowBounds;
+            internal KCgWindowBounds KCgWindowBounds;
             internal uint KCgWindowIsOnscreen;
             internal int KCgWindowLayer;
             internal uint KCgWindowMemoryUsage;
             internal uint KCgWindowNumber;
-            internal string? KCgWindowOwnerName;
+            internal string KCgWindowOwnerName;
             internal uint KCgWindowOwnerPid;
             internal uint KCgWindowSharingState;
             internal uint KCgWindowStoreType;
@@ -56,11 +57,11 @@ namespace Gearbox.Core.Natives.MacOS.Interop
                             }
                             else if (iprop.FieldType == typeof(uint))
                             {
-                                iprop.SetValue(innerVal, uint.Parse(ival.Description));
+                                iprop.SetValue(innerVal, uint.Parse(ival.Description, CultureInfo.CurrentCulture));
                             }
                             else if (iprop.FieldType == typeof(int))
                             {
-                                iprop.SetValue(innerVal, int.Parse(ival.Description));
+                                iprop.SetValue(innerVal, int.Parse(ival.Description, CultureInfo.CurrentCulture));
                             }
                         }
 
@@ -72,11 +73,11 @@ namespace Gearbox.Core.Natives.MacOS.Interop
                     }
                     else if (prop.FieldType == typeof(uint))
                     {
-                        prop.SetValue(this, uint.Parse(value.Description));
+                        prop.SetValue(this, uint.Parse(value.Description, CultureInfo.CurrentCulture));
                     }
                     else if (prop.FieldType == typeof(int))
                     {
-                        prop.SetValue(this, int.Parse(value.Description));
+                        prop.SetValue(this, int.Parse(value.Description, CultureInfo.CurrentCulture));
                     }
                 }
             }

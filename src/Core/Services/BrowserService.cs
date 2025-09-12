@@ -50,9 +50,9 @@ namespace Gearbox.Core.Services
                 var typesPreferences = new Dictionary<string, string>();
                 _configuration.Bind("types", typesPreferences);
 
-                var urlMatchKey = urlPreferences.FirstOrDefault(m => new Regex(m.Key.Replace("*", ".*")).Match(url).Success).Key;
-                var sourceMatchKey = sourcePreferences.FirstOrDefault(m => new Regex(m.Key.Replace("*", ".*")).Match(windowTitle).Success).Key;
-                var typeMatchKey = typesPreferences.FirstOrDefault(m => url.EndsWith(m.Key.Replace("*.", "."))).Key;
+                var urlMatchKey = urlPreferences.FirstOrDefault(m => new Regex(m.Key.Replace("*", ".*", StringComparison.InvariantCultureIgnoreCase)).Match(url).Success).Key;
+                var sourceMatchKey = sourcePreferences.FirstOrDefault(m => new Regex(m.Key.Replace("*", ".*", StringComparison.InvariantCultureIgnoreCase)).Match(windowTitle).Success).Key;
+                var typeMatchKey = typesPreferences.FirstOrDefault(m => url.EndsWith(m.Key.Replace("*.", ".", StringComparison.InvariantCultureIgnoreCase), StringComparison.InvariantCultureIgnoreCase)).Key;
 
                 var value = _configuration["general:default"] ?? string.Empty;
                 if (!string.IsNullOrWhiteSpace(urlMatchKey))
@@ -70,7 +70,7 @@ namespace Gearbox.Core.Services
 
                 /* LAUNCH */
 
-                Browser? browser = null;
+                Browser browser = null;
                 try
                 {
                     if (string.IsNullOrWhiteSpace(value))
@@ -109,6 +109,11 @@ namespace Gearbox.Core.Services
             }
 
             return false;
+        }
+
+        public async Task<bool> LaunchAsync(Uri url, string windowTitle = "")
+        {
+            return await LaunchAsync(url.ToString(), windowTitle);
         }
 
         public async Task<bool> LaunchAsync(IBrowser browser, string url)
@@ -150,6 +155,11 @@ namespace Gearbox.Core.Services
             return false;
         }
 
+        public async Task<bool> LaunchAsync(IBrowser browser, Uri url)
+        {
+            return await LaunchAsync(browser, url.ToString());
+        }
+
         private async Task StartProcess(IBrowser browser, string url)
         {
             if (string.IsNullOrWhiteSpace(browser.Path)) { throw new OperationCanceledException("Browser path cannot be launched without a value."); }
@@ -176,7 +186,7 @@ namespace Gearbox.Core.Services
             {
                 if (!ProcessX.AcceptableExitCodes.Contains(ex.ExitCode))
                 {
-                    _logger.LogDebug("ERROR, ExitCode: " + ex.ExitCode);
+                    _logger.LogDebug("ERROR, ExitCode: {ExitCode}", ex.ExitCode);
                     throw;
                 }
             }

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Gearbox.Runner
 {
     [ExcludeFromCodeCoverage]
-    public static class Extensions
+    public static class DependencyInjectionExtensions
     {
         public static IServiceCollection AddRunner(this IServiceCollection serviceCollection)
         {

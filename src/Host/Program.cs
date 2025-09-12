@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -18,8 +19,8 @@ namespace Gearbox.Host
     [ExcludeFromCodeCoverage]
     public static class Program
     {
-        private static IServiceProvider? Services { get; set; }
-        private static IConfiguration? Configuration { get; set; }
+        private static IServiceProvider Services { get; set; }
+        private static IConfiguration Configuration { get; set; }
 
         [STAThread]
         public static void Main(string[] args)
@@ -30,7 +31,7 @@ namespace Gearbox.Host
             var host = builder.Build();
             Services = host.Services;
 
-            var mutex = new Mutex(true, Metadata.Product, out var result);
+            var mutex = new Mutex(true, AssemblyMetadata.Product, out var result);
             if (!result)
             {
                 Environment.Exit(1);
@@ -45,7 +46,8 @@ namespace Gearbox.Host
                         path: Path.Combine(OS.GetDataDir(), "Logs/.log"),
                         rollingInterval: RollingInterval.Day,
                         flushToDiskInterval: TimeSpan.FromSeconds(30),
-                        shared: true
+                        shared: true,
+                        formatProvider: CultureInfo.CurrentCulture
                     );
                 })
                 .Enrich.FromLogContext()
@@ -54,21 +56,21 @@ namespace Gearbox.Host
                 .Enrich.WithProcessName()
                 .Enrich.WithThreadId()
                 .Enrich.WithThreadName()
-                .Enrich.WithProperty("ApplicationName", Metadata.Product);
+                .Enrich.WithProperty("ApplicationName", AssemblyMetadata.Product);
 
             // Initialize Logger
             Log.Logger = loggerConfiguration
-                .WriteTo.Trace()
+                .WriteTo.Trace(formatProvider: CultureInfo.CurrentCulture)
                 .CreateLogger();
 
-            System.Runtime.Exceptions.UnhandledException += (_, e) =>
+            System.Runtime.ExceptionHandler.UnhandledException += (_, e) =>
             {
                 var logger = Services?.GetService<ILoggerFactory>()?.CreateLogger(typeof(Program));
                 var ex = e.ExceptionObject as Exception;
                 logger?.LogCritical(ex, "{Message}", ex?.Message);
             };
 
-            ILogger? logger = null;
+            ILogger logger = null;
             try
             {
                 IsRunning = true;

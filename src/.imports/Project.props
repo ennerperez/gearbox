@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Label="Project">
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>default</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>false</Deterministic>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <Import Project="$(_ImportDirectory)AssemblyInfo.props"/>
+
+  <ItemGroup Label="AppSettings">
+    <Content Remove="$(MSBuildProjectDirectory)\appsettings.json"/>
+    <Content Remove="$(MSBuildProjectDirectory)\appsettings.*.json"/>
+    <Content Include="$(MSBuildProjectDirectory)\appsettings.*.json" Condition="Exists('$(MSBuildProjectDirectory)\appsettings.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DependentUpon>appsettings.json</DependentUpon>
+    </Content>
+    <Content Include="$(MSBuildProjectDirectory)\appsettings.json" Condition="Exists('$(MSBuildProjectDirectory)\appsettings.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(MSBuildProjectDirectory)\appsettings.*.json" Condition="!Exists('$(MSBuildProjectDirectory)\appsettings.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup Label="Enviroments">
+    <None Include="$(SourceDirectory)\.env" Condition="Exists('$(SourceDirectory)\.env')">
+      <Link>.env</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <PropertyGroup Label="Docker">
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup Label="Docker" Condition="Exists('Dockerfile')">
+    <Content Include="$(SourceDirectory).dockerignore">
+      <Link>.dockerignore</Link>
+      <DependentUpon>Dockerfile</DependentUpon>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup Label="Certificates">
+    <Content Include="*.pfx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup Label="HTTP Files">
+    <Content Include="*.http">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <DependentUpon>http-client.http</DependentUpon>
+    </Content>
+    <Content Update="http-client.*">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <DependentUpon>http-client.http</DependentUpon>
+    </Content>
+    <Content Update="http-client.private.*">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <DependentUpon>http-client.http</DependentUpon>
+    </Content>
+  </ItemGroup>
+
+  <Import Project="$(_ImportDirectory)Project.Serilog.props" />
+  <Import Project="$(_ImportDirectory)Project.Reqnroll.props" />
+
+</Project>

@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest a new idea or enhancement for the project.
+title: "[FEAT] Concise feature request title"
+labels: enhancement, feature-request
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+
+  - type: input
+    id: feature-summary
+    attributes:
+      label: Feature Summary
+      description: A clear and concise description of the requested feature.
+      placeholder: What problem does this feature solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Explain why this feature is needed and its potential benefits.
+      placeholder: Describe your motivation here...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: Describe any alternatives you've considered.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched the existing issues and found no similar requests.
+          required: true
+        - label: I understand that this is a request and not a guarantee of implementation.
+          required: true

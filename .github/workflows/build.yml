@@ -1,26 +1,27 @@
 name: Build
-
 on:
-  push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
+  workflow_call:
+
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           submodules: recursive
           fetch-depth: 3
+
       - name: Permissions
         run: chmod +x build.sh
+
       - name: Pack
         run: ./build.sh --target Pack --no-logo
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
       - name: Migrations
         uses: actions/upload-artifact@v3
         with:
@@ -28,6 +29,7 @@ jobs:
           path: |
             output/Scripts/*.sql
           if-no-files-found: warn
+
       - name: Packages
         uses: actions/upload-artifact@v3
         with:
@@ -35,6 +37,7 @@ jobs:
           path: |
             output/*.nupkg
           if-no-files-found: warn
+
       - name: Artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -42,25 +45,3 @@ jobs:
           path: |
             output/*.zip
           if-no-files-found: warn
-  publish:
-    name: Publish
-    needs: build
-    environment:
-      name: 'Production'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: artifacts
-
-      - name: Release
-        uses: ncipollo/release-action@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          draft: false
-          prerelease: false
-          artifacts: |
-            *.nupkg
-            *.zip

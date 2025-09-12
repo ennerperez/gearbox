@@ -18,7 +18,7 @@ namespace Gearbox.Shell.ViewModels
 #endif
         private void InitializeComponent()
         {
-            Title = Metadata.Product ?? "Gearbox";
+            Title = AssemblyMetadata.Product ?? "Gearbox";
         }
 
         [RelayCommand(CanExecute = nameof(IsNotBusy))]

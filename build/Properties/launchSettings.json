@@ -98,7 +98,7 @@
       "description": "Execute the code analysis",
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "commandLineArgs": "--target Analyze"
+      "commandLineArgs": "--target Analyze --no-logo"
     }
   }
 }

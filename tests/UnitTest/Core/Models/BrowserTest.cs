@@ -6,7 +6,7 @@ namespace Gearbox.UnitTest.Core.Models
     public class BrowserTest
     {
         [Fact]
-        public void Should_Create_A_New_Browser()
+        public void ShouldCreateANewBrowser()
         {
             var model = new Browser()
             {

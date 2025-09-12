@@ -1,15 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\src\.imports\Template.props" />
+  <Import Project="..\..\src\.imports\Template.targets" />
+
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <UsingSerilog>true</UsingSerilog>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <Nullable>enable</Nullable>
-    <LangVersion>default</LangVersion>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <Deterministic>false</Deterministic>
-    <RootNamespace>Gearbox.Host</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationIcon>..\..\res\icons\gearbox.ico</ApplicationIcon>
+    <RootNamespace>Gearbox.Host</RootNamespace>
     <AssemblyName>Gearbox.Host</AssemblyName>
   </PropertyGroup>
 
@@ -20,20 +22,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="9.0.7" />
-  </ItemGroup>
-
-  <ItemGroup Label="Serilog">
-    <PackageReference Include="Serilog" Version="4.3.0" />
-    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0"/>
-    <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0"/>
-    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="5.0.0"/>
-    <PackageReference Include="Serilog.Sinks.Trace" Version="4.0.0"/>
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
-    <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0"/>
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0"/>
   </ItemGroup>
 
   <ItemGroup>

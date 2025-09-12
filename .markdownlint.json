@@ -1,0 +1,21 @@
+﻿{
+  "default": true,
+  "first-line-heading": false,
+  "MD005": false,
+  "MD007": false,
+  "MD013": {
+    "line_length": 1000
+  },
+  "MD025": false,
+  "MD033": {
+    "allowed_elements": [
+      "BlogExcerpt",
+      "ApplicableVersion",
+      "BlogIndex"
+    ]
+  },
+  "MD036": false,
+  "MD046": {
+    "style": "fenced"
+  }
+}

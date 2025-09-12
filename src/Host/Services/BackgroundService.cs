@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -42,7 +43,7 @@ namespace Gearbox.Host.Services
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var cmd = await _queueService.ReceiveMessageAsync(Metadata.Product ?? "Gearbox", cancellationToken: stoppingToken);
+                var cmd = await _queueService.ReceiveMessageAsync(AssemblyMetadata.Product ?? "Gearbox", cancellationToken: stoppingToken);
                 if (cmd != null)
                 {
                     var forceRegisterCommandMatch = RegisterCommandRegex().Match(cmd.MessageText);
@@ -70,7 +71,7 @@ namespace Gearbox.Host.Services
                         }
 
                         _logger.LogInformation("Launching browser with command: {Command} and window title: {WindowTitle}", cmd.MessageText, windowTitle);
-                        await _browserService.LaunchAsync(cmd.MessageText.Trim(), windowTitle);
+                        await _browserService.LaunchAsync(new Uri(cmd.MessageText.Trim()), windowTitle);
                     }
                 }
 

@@ -9,10 +9,6 @@ namespace Gearbox.Shell.Services
     {
         public WindowsNotificationManager(WindowsApplicationContext context)
         {
-
-        }
-        public void Dispose()
-        {
         }
 
         public Task Initialize()
@@ -35,9 +31,41 @@ namespace Gearbox.Shell.Services
             return Task.CompletedTask;
         }
 
-        public string? LaunchActionId { get; }
+        public string LaunchActionId { get; }
         public NotificationManagerCapabilities Capabilities { get; }
-        public event EventHandler<NotificationActivatedEventArgs>? NotificationActivated;
-        public event EventHandler<NotificationDismissedEventArgs>? NotificationDismissed;
+
+#pragma warning disable CS0067
+        public event EventHandler<NotificationActivatedEventArgs> NotificationActivated;
+        public event EventHandler<NotificationDismissedEventArgs> NotificationDismissed;
+#pragma warning disable CS0067
+
+        #region IDisposable
+
+        private void ReleaseUnmanagedResources()
+        {
+            // TODO release unmanaged resources here
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            ReleaseUnmanagedResources();
+            if (disposing)
+            {
+                // TODO release managed resources here
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~WindowsNotificationManager()
+        {
+            Dispose(false);
+        }
+
+        #endregion
     }
 }

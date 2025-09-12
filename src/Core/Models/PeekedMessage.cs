@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 
 namespace Gearbox.Core.Models
@@ -30,14 +32,14 @@ namespace Gearbox.Core.Models
         [EditorBrowsable(EditorBrowsableState.Never)]
         public string MessageText
         {
-            get => Encoding.Default.GetString(Body);
+            get => Encoding.Default.GetString(Body.ToArray());
             set => Body = Encoding.Default.GetBytes(value);
         }
 
         /// <summary>
         /// The content of the Message.
         /// </summary>
-        public byte[] Body { get; internal set; } = Array.Empty<byte>();
+        public IEnumerable<byte> Body { get; internal set; } = Array.Empty<byte>();
 
         /// <summary>
         /// The time the Message was inserted into the Queue.

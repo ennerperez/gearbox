@@ -34,18 +34,18 @@ namespace Gearbox.Core.Natives.Linux
         public RegisterStatus GetRegisterStatus()
         {
             var currentValue = Xdg.GetSetting(Xdg.DEFAULT_WEB_BROWSER);
-            return currentValue == $"{Metadata.Product}.desktop" ? RegisterStatus.Registered : RegisterStatus.Unregistered;
+            return currentValue == $"{AssemblyMetadata.Product}.desktop" ? RegisterStatus.Registered : RegisterStatus.Unregistered;
         }
 
         public Task<bool> RegisterAsync()
         {
             _logger.LogInformation("Registering...");
 
-            HandleUrls($"{Metadata.Product}.desktop");
+            HandleUrls($"{AssemblyMetadata.Product}.desktop");
             OpenSettings();
 
-            _logger.LogInformation("Please set {Product} as the default browser in Settings.", Metadata.Product);
-            _notificationService.ShowAsync(new Notification("Register as deafult browser.", $"Please set {Metadata.Product} as the default browser in Settings."));
+            _logger.LogInformation("Please set {Product} as the default browser in Settings.", AssemblyMetadata.Product);
+            _notificationService.ShowAsync(new Notification("Register as deafult browser.", $"Please set {AssemblyMetadata.Product} as the default browser in Settings."));
             return Task.FromResult(true);
         }
 
@@ -90,7 +90,7 @@ namespace Gearbox.Core.Natives.Linux
                 case RegisterStatus.Updated:
                     await UnregisterAsync(); // Unregister the old path
                     await RegisterAsync(); // Register with the new path
-                    await _notificationService.ShowAsync(new Notification("Updated location", $"{Metadata.Product} has been re-registered with a new path."));
+                    await _notificationService.ShowAsync(new Notification("Updated location", $"{AssemblyMetadata.Product} has been re-registered with a new path."));
                     return true;
             }
 
@@ -115,14 +115,14 @@ namespace Gearbox.Core.Natives.Linux
 
         public void StartHost()
         {
-            var background = Process.GetProcessesByName($"{Metadata.Product ?? "Gearbox"}.Host");
+            var background = Process.GetProcessesByName($"{AssemblyMetadata.Product ?? "Gearbox"}.Host");
             if (background.Length != 0)
             {
                 return;
             }
 
             _logger.LogWarning("Host is not running.");
-            var hostPath = Path.Combine(AppContext.BaseDirectory, $"{Metadata.Product ?? "Gearbox"}.Host");
+            var hostPath = Path.Combine(AppContext.BaseDirectory, $"{AssemblyMetadata.Product ?? "Gearbox"}.Host");
             if (File.Exists(hostPath))
             {
                 _logger.LogInformation("Starting host at {HostPath}", hostPath);

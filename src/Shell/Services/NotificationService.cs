@@ -18,7 +18,7 @@ namespace Gearbox.Shell.Services
             _notificationManager.NotificationActivated += NotificationManagerOnNotificationActivated;
         }
 
-        private void NotificationManagerOnNotificationActivated(object? sender, NotificationActivatedEventArgs e)
+        private void NotificationManagerOnNotificationActivated(object sender, NotificationActivatedEventArgs e)
         {
             var result = s_cache.TryPop(out var item);
             if (!result) { return; }
@@ -33,7 +33,7 @@ namespace Gearbox.Shell.Services
             }
         }
 
-        private void NotificationManagerOnNotificationDismissed(object? sender, NotificationDismissedEventArgs e)
+        private void NotificationManagerOnNotificationDismissed(object sender, NotificationDismissedEventArgs e)
         {
 
         }

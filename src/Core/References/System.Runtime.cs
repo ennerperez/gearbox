@@ -50,11 +50,11 @@ namespace System.Runtime
             var osAppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             if (string.IsNullOrEmpty(osAppDataDir))
             {
-                dataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), $".{Metadata.Product?.ToLower()}");
+                dataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), $".{AssemblyMetadata.Product?.ToLower(Globalization.CultureInfo.CurrentCulture)}");
             }
             else
             {
-                dataDir = Path.Combine(osAppDataDir, Metadata.Product ?? string.Empty);
+                dataDir = Path.Combine(osAppDataDir, AssemblyMetadata.Product ?? string.Empty);
             }
 
             if (!Directory.Exists(dataDir))
@@ -67,11 +67,11 @@ namespace System.Runtime
     }
 
     [ExcludeFromCodeCoverage]
-    public static class Exceptions
+    public static class ExceptionHandler
     {
-        public static event UnhandledExceptionEventHandler? UnhandledException;
+        public static event UnhandledExceptionEventHandler UnhandledException;
 
-        static Exceptions()
+        static ExceptionHandler()
         {
             // This is the normal event expected, and should still be used.
             // It will fire for exceptions from iOS and Mac Catalyst,

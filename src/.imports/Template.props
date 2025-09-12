@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <_DebugTemplate>true</_DebugTemplate>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Template Paths">
+    <SourceDirectory>$(MSBuildThisFileDirectory)..\..\</SourceDirectory>
+    <_ImportDirectory>$(SourceDirectory)src\.imports\</_ImportDirectory>
+    <_FilesDirectory>$(SourceDirectory)src\.files\</_FilesDirectory>
+    <TestsDirectory>$(MSBuildThisFileDirectory)..\..\tests\</TestsDirectory>
+    <_ConfigFile>$(SourceDirectory).config\dotnet-tools.json</_ConfigFile>
+    <_EnvFile>$(SourceDirectory).env</_EnvFile>
+  </PropertyGroup>
+
+  <Import Project="$(_ImportDirectory)Features.props"/>
+  <Import Project="$(_ImportDirectory)Project.props"/>
+  <Import Condition="Exists('$(MSBuildProjectDirectory)\Options.props')" Project="$(MSBuildProjectDirectory)\Options.props"/>
+
+</Project>

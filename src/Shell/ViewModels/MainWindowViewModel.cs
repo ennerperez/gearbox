@@ -102,7 +102,7 @@ namespace Gearbox.Shell.ViewModels
             {
                 IsBusy = true;
                 Owner?.Hide();
-                await _browserService.LaunchAsync(browser, Url);
+                await _browserService.LaunchAsync(browser, new Uri(Url));
                 IsBusy = false;
             }
 
@@ -114,10 +114,10 @@ namespace Gearbox.Shell.ViewModels
         private string? _url;
 #else
         [ObservableProperty]
-        private string? _url = "https://www.google.com";
+        private string _url = "https://www.google.com";
 #endif
 
         [ObservableProperty]
-        private IEnumerable<IBrowser>? _browsers;
+        private IEnumerable<IBrowser> _browsers;
     }
 }

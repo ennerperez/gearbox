@@ -125,7 +125,7 @@ namespace System.Reflection
     }
 
     [ExcludeFromCodeCoverage]
-    public static partial class Metadata
+    public static partial class AssemblyMetadata
     {
         #region Metadata
 

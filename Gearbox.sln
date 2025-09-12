@@ -42,6 +42,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Host", "src\Host\Host.cspro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shell", "src\Shell\Shell.csproj", "{65E5B7FD-1497-4B7E-AFDB-58F77D4EFD9B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".imports", ".imports", "{948CF09B-1926-49AE-9454-AC7881F95CE6}"
+	ProjectSection(SolutionItems) = preProject
+		src\.imports\AssemblyInfo.props = src\.imports\AssemblyInfo.props
+		src\.imports\Features.props = src\.imports\Features.props
+		src\.imports\Features.targets = src\.imports\Features.targets
+		src\.imports\Project.props = src\.imports\Project.props
+		src\.imports\Project.targets = src\.imports\Project.targets
+		src\.imports\Template.props = src\.imports\Template.props
+		src\.imports\Template.targets = src\.imports\Template.targets
+		src\.imports\Project.Reqnroll.props = src\.imports\Project.Reqnroll.props
+		src\.imports\Project.Serilog.props = src\.imports\Project.Serilog.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,5 +92,6 @@ Global
 		{9ED33FEF-5F9F-450D-8E9F-D75E30D9A789} = {20C5979A-3F19-4308-9187-07C0D1A04077}
 		{F02966D0-8698-4E93-9388-81E7FF9367C9} = {0F1E527B-1004-46F4-AAA8-7B12723EC486}
 		{65E5B7FD-1497-4B7E-AFDB-58F77D4EFD9B} = {0F1E527B-1004-46F4-AAA8-7B12723EC486}
+		{948CF09B-1926-49AE-9454-AC7881F95CE6} = {0F1E527B-1004-46F4-AAA8-7B12723EC486}
 	EndGlobalSection
 EndGlobal

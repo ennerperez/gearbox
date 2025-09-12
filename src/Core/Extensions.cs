@@ -12,11 +12,11 @@ using OS = System.Runtime.OperatingSystemExtensions;
 namespace Gearbox.Core
 {
     [ExcludeFromCodeCoverage]
-    public static class Extensions
+    public static class DependencyInjectionExtensions
     {
         public static IServiceCollection AddPersistence(this IServiceCollection serviceCollection)
         {
-            var cs = new ConnectionString(Path.Combine(OS.GetDataDir(), $"{Metadata.Product ?? "Gearbox"}.qdb"))
+            var cs = new ConnectionString(Path.Combine(OS.GetDataDir(), $"{AssemblyMetadata.Product ?? "Gearbox"}.qdb"))
             {
                 Connection = ConnectionType.Shared
             };
@@ -45,7 +45,7 @@ namespace Gearbox.Core
             serviceCollection.AddSingleton<IBrowserService, BrowserService>();
             return serviceCollection;
         }
-        
+
         public static IServiceCollection WithBackend(this IServiceCollection serviceCollection)
         {
             if (OperatingSystem.IsWindows())

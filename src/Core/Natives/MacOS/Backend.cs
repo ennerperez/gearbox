@@ -53,8 +53,8 @@ namespace Gearbox.Core.Natives.MacOS
 
             OpenSettings();
 
-            _logger.LogInformation("Please set {Product} as the default browser in Settings.", Metadata.Product);
-            _notificationService.ShowAsync(new Notification("Register as deafult browser.", $"Please set {Metadata.Product} as the default browser in Settings."));
+            _logger.LogInformation("Please set {Product} as the default browser in Settings.", AssemblyMetadata.Product);
+            _notificationService.ShowAsync(new Notification("Register as deafult browser.", $"Please set {AssemblyMetadata.Product} as the default browser in Settings."));
             return Task.FromResult(true);
         }
 
@@ -78,7 +78,7 @@ namespace Gearbox.Core.Natives.MacOS
                 case RegisterStatus.Updated:
                     await UnregisterAsync(); // Unregister the old path
                     await RegisterAsync(); // Register with the new path
-                    await _notificationService.ShowAsync(new Notification("Updated location", $"{Metadata.Product} has been re-registered with a new path."));
+                    await _notificationService.ShowAsync(new Notification("Updated location", $"{AssemblyMetadata.Product} has been re-registered with a new path."));
                     return true;
             }
             return false;
@@ -87,14 +87,14 @@ namespace Gearbox.Core.Natives.MacOS
         public void OpenSettings() => Process.Start(new ProcessStartInfo { FileName = "x-apple.systempreferences:com.apple.Desktop-Settings.extension", UseShellExecute = true });
         public void StartHost()
         {
-            var background = Process.GetProcessesByName($"{Metadata.Product ?? "Gearbox"}.Host");
+            var background = Process.GetProcessesByName($"{AssemblyMetadata.Product ?? "Gearbox"}.Host");
             if (background.Length != 0)
             {
                 return;
             }
 
             _logger.LogWarning("Host is not running.");
-            var hostPath = Path.Combine(AppContext.BaseDirectory, $"{Metadata.Product ?? "Gearbox"}.Host");
+            var hostPath = Path.Combine(AppContext.BaseDirectory, $"{AssemblyMetadata.Product ?? "Gearbox"}.Host");
             if (File.Exists(hostPath))
             {
                 _logger.LogInformation("Starting host at {HostPath}", hostPath);

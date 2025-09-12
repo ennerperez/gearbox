@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Gearbox.Core.Interfaces;
 #if LINUX
 using Gearbox.Core.Natives.Linux;
@@ -24,7 +26,7 @@ namespace Gearbox.UnitTest.Core.Natives
         public BackendTest()
         {
             Assembly.GetEntryAssembly()?.ReadMetadata();
-            Metadata.Product = "Gearbox";
+            AssemblyMetadata.Product = "Gearbox";
 
             var notificationService = Substitute.For<INotificationService>();
             var logger = Substitute.For<ILogger<Backend>>();
@@ -70,7 +72,7 @@ namespace Gearbox.UnitTest.Core.Natives
             });
             t1.Start();
             await Task.Delay(3000);
-            var processName = $"{Metadata.Product ?? "Gearbox"}.Host";
+            var processName = $"{AssemblyMetadata.Product ?? "Gearbox"}.Host";
             var process = Process.GetProcessesByName(processName);
             process.Length.ShouldBeGreaterThan(0);
         }

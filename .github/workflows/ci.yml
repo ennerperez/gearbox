@@ -1,0 +1,126 @@
+﻿name: Continuous Integration
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+      #      print_tags:
+      #        description: 'True to print to STDOUT'
+      #        required: true
+      #        type: boolean
+      #      tags:
+      #        description: 'Test scenario tags'
+      #        required: true
+      #        type: string
+      run_tests:
+        description: 'Run tests'
+        default: true
+        required: true
+        type: boolean
+      create_release:
+        description: 'Create release'
+        default: false
+        required: false
+        type: boolean
+
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Version
+        run: echo "TAG=$(git describe || echo 1.0.0)" >> tag.env
+
+      - name: Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: version
+          path: tag.env
+          if-no-files-found: warn
+
+  tests:
+    name: Tests
+    needs: [ prepare ]
+    uses: ./.github/workflows/test.yml
+
+  build:
+    name: Build
+    needs: [ tests ]
+    uses: ./.github/workflows/build.yml
+
+  release:
+    name: Release
+    if: ${{ inputs.create_release }}
+    needs: [ build ]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Output version string
+        id: version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Create
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: gh release create "$TAG" -t "$VERSION" --notes-from-tag
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts
+
+      - name: Migrations
+        uses: actions/upload-artifact@v4
+        with:
+          name: migrations
+          path: |
+            artifacts/output/scripts/*.sql
+          if-no-files-found: warn
+
+      - name: Bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundles
+          path: |
+            artifacts/output/bundles/*.*
+          if-no-files-found: warn
+
+      - name: Packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            artifacts/output/*.nupkg
+          if-no-files-found: warn
+
+      - name: Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts
+          path: |
+            artifacts/output/*.zip
+          if-no-files-found: warn
+
+      - name: Upload
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: gh release upload "$TAG" packages/*
