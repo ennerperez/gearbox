@@ -9,7 +9,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 3
@@ -23,7 +23,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Migrations
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: migrations
           path: |
@@ -31,7 +31,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: packages
           path: |
@@ -39,7 +39,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: artifacts
           path: |
