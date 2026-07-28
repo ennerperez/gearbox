@@ -10,9 +10,9 @@
     </Style>
     <Style Selector="Window">
         <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
-        <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
+        <!--<Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />-->
         <Setter Property="ExtendClientAreaTitleBarHeightHint" Value="-1" />
-        <Setter Property="SystemDecorations" Value="None" />
+        <Setter Property="WindowDecorations" Value="None" />
         <Setter Property="TransparencyLevelHint" Value="Transparent" />
         <Setter Property="Background" Value="Transparent" />
     </Style>
