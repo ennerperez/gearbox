@@ -17,7 +17,7 @@
     <RootNamespace>Gearbox.Shell</RootNamespace>
     <AssemblyName>Gearbox</AssemblyName>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <Product>Gearbox</Product>
     <Description>Gearbox Browser Launcher</Description>
@@ -77,33 +77,33 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DesktopNotifications.Avalonia" Version="1.3.1"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.7"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.7"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.7"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.7"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="9.0.7"/>
-    <PackageReference Include="Avalonia" Version="11.3.6"/>
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.6"/>
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.6"/>
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.6"/>
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.6" Condition="'$(Configuration)' == 'Debug'">
+    <PackageReference Include="DesktopNotifications.Avalonia"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Ini"/>
+    <PackageReference Include="Avalonia"/>
+    <PackageReference Include="Avalonia.Desktop"/>
+    <PackageReference Include="Avalonia.Fonts.Inter"/>
+    <PackageReference Include="Avalonia.Themes.Fluent"/>
+    <!--Condition below is needed to remove AvaloniaUI.DiagnosticsSupport package from build output in Release configuration.-->
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Condition="'$(Configuration)' == 'Debug'">
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7"/>
-    <PackageReference Include="ShimSkiaSharp" Version="3.0.3"/>
-    <PackageReference Include="Skia.Controls.Avalonia" Version="11.3.0.1"/>
-    <PackageReference Include="SkiaSharp" Version="3.119.0"/>
-    <PackageReference Include="SkiaSharp.HarfBuzz" Version="3.119.0"/>
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.0"/>
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.0"/>
-    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="3.119.0"/>
-    <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly" Version="3.119.0"/>
-    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.0"/>
-    <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="11.3.0.1"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
+    <PackageReference Include="CommunityToolkit.Mvvm"/>
+    <PackageReference Include="ShimSkiaSharp"/>
+    <PackageReference Include="Skia.Controls.Avalonia"/>
+    <PackageReference Include="SkiaSharp"/>
+    <PackageReference Include="SkiaSharp.HarfBuzz"/>
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux"/>
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies"/>
+    <PackageReference Include="SkiaSharp.NativeAssets.macOS"/>
+    <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly"/>
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32"/>
+    <PackageReference Include="Svg.Controls.Skia.Avalonia"/>
   </ItemGroup>
 
   <ItemGroup>

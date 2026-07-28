@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="Serilog" Condition="'$(UsingSerilog)' == 'true'">
+    <PackageReference Include="Serilog"/>
+    <PackageReference Include="Serilog.Settings.Configuration"/>
+    <PackageReference Include="Serilog.Extensions.Logging"/>
+    <PackageReference Include="Serilog.Sinks.Async"/>
+    <PackageReference Include="Serilog.Sinks.Console"/>
+    <PackageReference Include="Serilog.Sinks.File"/>
+    <PackageReference Include="Serilog.Sinks.PeriodicBatching"/>
+    <PackageReference Include="Serilog.Sinks.Trace"/>
+    <PackageReference Include="Serilog.Enrichers.Environment"/>
+    <PackageReference Include="Serilog.Enrichers.Process"/>
+    <PackageReference Include="Serilog.Enrichers.Thread"/>
+    <PackageReference Condition="'$(UsingMicrosoftNETSdkRazor)' == 'true' OR '$(UsingMicrosoftNETSdkWeb)' == 'true'" Include="Serilog.AspNetCore"/>
+    <PackageReference Condition="'$(UsingDatadog)' == 'true'" Include="Serilog.Sinks.Datadog.Logs"/>
+    <PackageReference Condition="'$(UsingSentry)' == 'true'" Include="Sentry.Serilog"/>
+  </ItemGroup>
+</Project>

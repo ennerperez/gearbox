@@ -3,7 +3,7 @@
   "isRoot": true,
   "tools": {
     "nuke.globaltool": {
-      "version": "9.0.4",
+      "version": "10.1.0",
       "commands": [
         "nuke"
       ],
@@ -17,21 +17,21 @@
       "rollForward": false
     },
     "dotnet-sonarscanner": {
-      "version": "10.3.0",
+      "version": "11.2.1",
       "commands": [
         "dotnet-sonarscanner"
       ],
       "rollForward": false
     },
     "dotnet-coverage": {
-      "version": "18.0.4",
+      "version": "18.9.0",
       "commands": [
         "dotnet-coverage"
       ],
       "rollForward": false
     },
     "coverlet.console": {
-      "version": "6.0.4",
+      "version": "10.0.1",
       "commands": [
         "coverlet"
       ]
@@ -41,6 +41,20 @@
       "commands": [
         "trx2junit"
       ]
+    },
+    "gitversion.tool": {
+      "version": "6.8.2",
+      "commands": [
+        "dotnet-gitversion"
+      ],
+      "rollForward": false
+    },
+    "dotnet-reportgenerator-globaltool": {
+      "version": "5.5.10",
+      "commands": [
+        "reportgenerator"
+      ],
+      "rollForward": false
     }
   }
 }

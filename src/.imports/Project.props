@@ -11,19 +11,22 @@
   </PropertyGroup>
 
   <Import Project="$(_ImportDirectory)AssemblyInfo.props"/>
+  <Import Project="$(_ImportDirectory)Telemetry.props"/>
+  <Import Project="$(_ImportDirectory)Tests.props"/>
 
   <ItemGroup Label="AppSettings">
     <Content Remove="$(MSBuildProjectDirectory)\appsettings.json"/>
     <Content Remove="$(MSBuildProjectDirectory)\appsettings.*.json"/>
+    <Content Include="$(MSBuildProjectDirectory)\appsettings.json" Condition="Exists('$(MSBuildProjectDirectory)\appsettings.json')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <DependsOnTarget>PrepareForPublish</DependsOnTarget>
+    </Content>
     <Content Include="$(MSBuildProjectDirectory)\appsettings.*.json" Condition="Exists('$(MSBuildProjectDirectory)\appsettings.json')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DependentUpon>appsettings.json</DependentUpon>
-    </Content>
-    <Content Include="$(MSBuildProjectDirectory)\appsettings.json" Condition="Exists('$(MSBuildProjectDirectory)\appsettings.json')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(MSBuildProjectDirectory)\appsettings.*.json" Condition="!Exists('$(MSBuildProjectDirectory)\appsettings.json')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <DependsOnTarget>PrepareForPublish</DependsOnTarget>
     </Content>
   </ItemGroup>
 
@@ -34,7 +37,7 @@
     </None>
   </ItemGroup>
 
-  <PropertyGroup Label="Docker">
+  <PropertyGroup Label="Docker" Condition="Exists('Dockerfile')">
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
@@ -66,7 +69,16 @@
     </Content>
   </ItemGroup>
 
-  <Import Project="$(_ImportDirectory)Project.Serilog.props" />
-  <Import Project="$(_ImportDirectory)Project.Reqnroll.props" />
+  <ItemGroup Label="Analyzer">
+    <PackageReference Condition="'$(UsingSonarQube)' == 'true'" Include="SonarAnalyzer.CSharp">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Watch Remove="wwwroot\**\*" />
+    <Watch Remove=".\Logs\*" />
+  </ItemGroup>
 
 </Project>

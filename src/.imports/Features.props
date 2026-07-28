@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup Label="Framework" Condition="'$(UseMaui)' != 'true'">
-    <TargetFramework>net9.0</TargetFramework>
-  </PropertyGroup>
-  <PropertyGroup Label="Framework" Condition="'$(UseMaui)' == 'true'">
-    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
-  </PropertyGroup>
-
   <PropertyGroup Label="General">
     <UsingAssemblyInfoTemplate>true</UsingAssemblyInfoTemplate>
     <SkipServerCertificateValidation>true</SkipServerCertificateValidation>
@@ -49,7 +42,7 @@
     <UsingApiKey>false</UsingApiKey>
     <UsingBearer>true</UsingBearer>
     <UsingOpenId>false</UsingOpenId>
-    <UsingAuth0>true</UsingAuth0>
+    <UsingAuth0>false</UsingAuth0>
     <UsingSmartSchema>false</UsingSmartSchema>
     <UsingApiKeyTables>false</UsingApiKeyTables>
     <UsingTokenValidation>false</UsingTokenValidation>
@@ -67,7 +60,7 @@
     <UsingAuth0Api>false</UsingAuth0Api>
   </PropertyGroup>
 
-  <PropertyGroup Label="Loggin">
+  <PropertyGroup Label="Logs">
     <UsingSerilog>false</UsingSerilog>
   </PropertyGroup>
 
@@ -81,9 +74,9 @@
     <UsingSonarQube>true</UsingSonarQube>
   </PropertyGroup>
 
-  <PropertyGroup Label="Testing">
+  <PropertyGroup Label="Testing" Condition="$(MSBuildProjectFile.Contains('Tests'))">
     <TestExecutionFramework>xUnit</TestExecutionFramework>
-    <UsingReqnroll>true</UsingReqnroll>
+    <UsingReqnroll>false</UsingReqnroll>
     <UsingChromeDriver>false</UsingChromeDriver>
     <UsingGeckoDriver>false</UsingGeckoDriver>
     <UsingIEDriver>false</UsingIEDriver>

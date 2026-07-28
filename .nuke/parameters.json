@@ -1,6 +1,6 @@
 {
   "$schema": "build.schema.json",
-  "Solution": "Gearbox.sln",
+  "Solution": "Gearbox.slnx",
   "Author": "Enner Pérez",
   "Product": "Gearbox",
   "ProjectUrl": "https://ennerperez.dev/",

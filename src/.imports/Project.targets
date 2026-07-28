@@ -5,5 +5,4 @@
     <DefineConstants Condition="'$(BuildConstants)' != ''">$(BuildConstants)$(DefineConstants)</DefineConstants>
     <DefineConstants Condition="'$(BuildConstants)' == ''">$(DefineConstants)</DefineConstants>
   </PropertyGroup>
-  
 </Project>

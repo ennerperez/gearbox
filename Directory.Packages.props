@@ -1,0 +1,170 @@
+<Project>
+  <PropertyGroup Label="Framework" Condition="'$(UseMaui)' != 'true'">
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup Label="Framework" Condition="'$(UseMaui)' == 'true'">
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- Enable central package management, https://learn.microsoft.com/en-us/nuget/consume-packages/Central-Package-Management -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <TargetFrameworkPackageVersion>10.0.10</TargetFrameworkPackageVersion>
+    <AvaloniaPackageVersion>12.1.0</AvaloniaPackageVersion>
+    <SkiaSharpPackageVersion>4.150.1</SkiaSharpPackageVersion>
+    <BuildPackageVersion>18.8.2</BuildPackageVersion>
+    <NoWarn>$(NoWarn);NU1507</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="AngleSharp" Version="1.5.2"/>
+    <PackageVersion Include="Datadog.Trace.Bundle" Version="3.49.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Identity.Core" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.11.0"/>
+    <PackageVersion Include="NuGet.Packaging" Version="7.6.0"/>
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="UnitsNet" Version="5.75.1"/>
+    <PackageVersion Include="FluentValidation" Version="12.1.1"/>
+    <PackageVersion Include="Mediator.Abstractions" Version="3.0.2"/>
+    <PackageVersion Include="Mediator.SourceGenerator" Version="3.0.2"/>
+    <PackageVersion Include="Refit" Version="11.2.0"/>
+    <PackageVersion Include="Refit.HttpClientFactory" Version="11.2.0"/>
+    <PackageVersion Include="System.Linq.Dynamic.Core" Version="1.7.3"/>
+    <PackageVersion Include="ConfigurationSubstitutor" Version="1.5.1"/>
+    <PackageVersion Include="DotNetEnv" Version="3.2.0"/>
+    <PackageVersion Include="Dapper" Version="2.1.79"/>
+    <PackageVersion Include="Auth0.AspNetCore.Authentication" Version="1.6.1"/>
+    <PackageVersion Include="Blazor.SessionStorage" Version="10.0.0"/>
+    <PackageVersion Include="ExcelDataReader" Version="3.9.0"/>
+    <PackageVersion Include="ExcelDataReader.DataSet" Version="3.9.0"/>
+    <PackageVersion Include="Humanizer.Core" Version="3.0.10"/>
+    <PackageVersion Include="Humanizer.Core.es" Version="3.0.10"/>
+    <PackageVersion Include="Radzen.Blazor" Version="11.1.6"/>
+    <PackageVersion Include="Asp.Versioning.Mvc" Version="10.0.0"/>
+    <PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.0.0"/>
+    <PackageVersion Include="Auth0.ManagementApi" Version="7.46.0"/>
+    <PackageVersion Include="DocumentFormat.OpenXml" Version="3.5.1"/>
+    <PackageVersion Include="SystemTextJsonPatch" Version="5.0.0"/>
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Bcl.TimeProvider" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Build" Version="$(BuildPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="$(BuildPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="$(BuildPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="7.0.1"/>
+    <PackageVersion Include="Microsoft.FeatureManagement" Version="4.6.0"/>
+    <PackageVersion Include="Microsoft.IdentityModel.Abstractions" Version="8.21.2"/>
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.2"/>
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols" Version="8.19.2"/>
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.19.2"/>
+    <PackageVersion Include="EFCore.BulkExtensions.PostgreSql" Version="10.0.1"/>
+    <PackageVersion Include="Nanoid" Version="3.1.0"/>
+    <PackageVersion Include="NetArchTest.eNhancedEdition" Version="1.4.5"/>
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.4"/>
+    <PackageVersion Include="Newtonsoft.Json.Bson" Version="1.0.3"/>
+    <PackageVersion Include="QuestPDF" Version="2026.7.1"/>
+    <PackageVersion Include="System.Diagnostics.EventLog" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3"/>
+    <PackageVersion Include="Npgsql" Version="10.0.3"/>
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Http.Polly" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Ini" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.8.0"/>
+    <PackageVersion Include="Microsoft.Extensions.Caching.Postgres" Version="1.2.2"/>
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="$(TargetFrameworkPackageVersion)"/>
+    <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1"/>
+    <PackageVersion Include="Nuke.Common" Version="10.1.0"/>
+    <PackageVersion Include="Squid-Box.SevenZipSharp" Version="1.6.2.24"/>
+    <PackageVersion Include="NUnit.ConsoleRunner" Version="3.20.2"/>
+    <PackageVersion Include="xunit.runner.console" Version="2.9.3"/>
+    <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.30.0.144632"/>
+    <PackageVersion Include="Serilog" Version="4.4.0"/>
+    <PackageVersion Include="Serilog.Sinks.Async" Version="2.1.0"/>
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.1"/>
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="10.0.0"/>
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1"/>
+    <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0"/>
+    <PackageVersion Include="Serilog.Sinks.PeriodicBatching" Version="5.0.0"/>
+    <PackageVersion Include="Serilog.Sinks.Trace" Version="4.0.0"/>
+    <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
+    <PackageVersion Include="Serilog.Enrichers.Process" Version="3.0.0"/>
+    <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0"/>
+    <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0"/>
+    <PackageVersion Include="Serilog.Exceptions.Refit" Version="8.4.0"/>
+    <PackageVersion Include="Serilog.Sinks.Datadog.Logs" Version="0.6.1"/>
+    <PackageVersion Include="Sentry.Serilog" Version="5.4.0"/>
+    <PackageVersion Include="xunit.v3" Version="3.2.2"/>
+    <PackageVersion Include="xunit.v3.extensibility.core" Version="3.2.2"/>
+    <PackageVersion Include="xunit.v3.runner.console" Version="3.2.2"/>
+    <PackageVersion Include="Xunit.v3.Priority" Version="1.1.18"/>
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5"/>
+    <PackageVersion Include="xunit.analyzers" Version="1.27.0"/>
+    <PackageVersion Include="Verify.XunitV3" Version="31.26.0"/>
+    <PackageVersion Include="Reqnroll" Version="3.3.4"/>
+    <PackageVersion Include="Reqnroll.Microsoft.Extensions.DependencyInjection" Version="3.3.4"/>
+    <PackageVersion Include="Reqnroll.Tools.MsBuild.Generation" Version="3.3.4"/>
+    <PackageVersion Include="Reqnroll.NUnit" Version="3.3.4"/>
+    <PackageVersion Include="Reqnroll.xUnit" Version="3.3.4"/>
+    <PackageVersion Include="Reqnroll.xunit.v3" Version="3.3.4"/>
+    <PackageVersion Include="Reqnroll.TUnit" Version="3.3.4"/>
+    <PackageVersion Include="Microsoft.Playwright" Version="1.61.0"/>
+    <PackageVersion Include="Microsoft.Playwright.Xunit.v3" Version="1.61.0"/>
+    <PackageVersion Include="Microsoft.Playwright.TestAdapter" Version="1.61.0"/>
+    <PackageVersion Include="AutoFixture" Version="4.18.1"/>
+    <PackageVersion Include="Bogus" Version="35.6.5"/>
+    <PackageVersion Include="bunit" Version="2.7.2"/>
+    <PackageVersion Include="coverlet.collector" Version="10.0.1"/>
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.8.1"/>
+    <PackageVersion Include="NSubstitute" Version="6.0.0"/>
+    <PackageVersion Include="Shouldly" Version="4.3.0"/>
+    <PackageVersion Include="Respawn" Version="7.0.0"/>
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.13.0"/>
+    <PackageVersion Include="Testcontainers.Redis" Version="4.13.0"/>
+    <PackageVersion Include="Riok.Mapperly" Version="4.3.1"/>
+    <PackageVersion Include="LiteDB" Version="5.0.21"/>
+    <PackageVersion Include="LiteDB.Async" Version="0.1.8"/>
+    <PackageVersion Include="MonoMac.Core" Version="0.0.23728"/>
+    <PackageVersion Include="ProcessX" Version="1.5.6"/>
+    <PackageVersion Include="DesktopNotifications.Avalonia" Version="1.3.1"/>
+    <PackageVersion Include="Avalonia" Version="$(AvaloniaPackageVersion)"/>
+    <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaPackageVersion)"/>
+    <PackageVersion Include="Avalonia.Fonts.Inter" Version="$(AvaloniaPackageVersion)"/>
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaPackageVersion)"/>
+    <PackageVersion Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3"/>
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2"/>
+    <PackageVersion Include="ShimSkiaSharp" Version="5.1.1"/>
+    <PackageVersion Include="Skia.Controls.Avalonia" Version="12.0.0.13"/>
+    <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="12.0.0.13"/>
+    <PackageVersion Include="SkiaSharp" Version="$(SkiaSharpPackageVersion)"/>
+    <PackageVersion Include="SkiaSharp.HarfBuzz" Version="$(SkiaSharpPackageVersion)"/>
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="$(SkiaSharpPackageVersion)"/>
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="$(SkiaSharpPackageVersion)"/>
+    <PackageVersion Include="SkiaSharp.NativeAssets.macOS" Version="$(SkiaSharpPackageVersion)"/>
+    <PackageVersion Include="SkiaSharp.NativeAssets.WebAssembly" Version="$(SkiaSharpPackageVersion)"/>
+    <PackageVersion Include="SkiaSharp.NativeAssets.Win32" Version="$(SkiaSharpPackageVersion)"/>
+    <PackageVersion Include="Tmds.DBus" Version="0.94.2"/>
+    <PackageVersion Include="Tmds.DBus.Protocol" Version="0.94.2"/>
+  </ItemGroup>
+</Project>
