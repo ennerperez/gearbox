@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\src\.imports\Template.props" />
-  <Import Project="..\src\.imports\Template.targets" />
+  <Import Project="..\src\.imports\Template.props"/>
+  <Import Project="..\src\.imports\Template.targets"/>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,10 +11,11 @@
     <NukeScriptDirectory>..</NukeScriptDirectory>
     <NukeTelemetryVersion>1</NukeTelemetryVersion>
     <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
-    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute"/>
   </ItemGroup>
 
   <PropertyGroup Condition=" Exists('7za.bin') ">
@@ -22,19 +23,29 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="9.0.4" />
-    <PackageReference Include="ConfigurationSubstitutor" Version="1.5.1" />
-    <PackageReference Include="DotNetEnv" Version="3.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.8" />
-    <PackageReference Include="Squid-Box.SevenZipSharp" Version="1.6.2.24" Condition="Exists('7za.bin')" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
+    <PackageReference Include="Microsoft.Build" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.IdentityModel.Abstractions" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="NuGet.Packaging" />
+    <PackageReference Include="Nuke.Common"/>
+    <PackageReference Include="Microsoft.Build.Tasks.Core" />
+    <PackageReference Include="ConfigurationSubstitutor"/>
+    <PackageReference Include="DotNetEnv"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables"/>
+    <PackageReference Include="System.Diagnostics.EventLog" />
+    <PackageReference Include="System.Security.Cryptography.Xml" />
+    <PackageReference Include="Squid-Box.SevenZipSharp" Condition="Exists('7za.bin')"/>
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Condition="'$(TestExecutionFramework)' == 'NUnit'" Include="NUnit.ConsoleRunner" ExcludeAssets="all" Version="3.16.3" />
-    <PackageReference Condition="'$(TestExecutionFramework)' == 'XUnit'" Include="xunit.runner.console" ExcludeAssets="all" Version="2.9.3" />
+    <PackageReference Condition="'$(TestExecutionFramework)' == 'NUnit'" Include="NUnit.ConsoleRunner" ExcludeAssets="all"/>
+    <PackageReference Condition="'$(TestExecutionFramework)' == 'XUnit'" Include="xunit.runner.console" ExcludeAssets="all"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -47,13 +58,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageDownload Include="coverlet.console" Version="[6.0.4]">
+    <PackageDownload Include="coverlet.console" Version="[10.0.1]">
       <ExcludeAssets>all</ExcludeAssets>
     </PackageDownload>
-    <PackageDownload Condition="'$(UsingDabaseProvider)' == 'true'" Include="dotnet-ef" Version="[9.0.8]" />
-    <PackageDownload Condition="'$(UsingSonarQube)' == 'true'" Include="dotnet-sonarscanner" Version="[10.3.0]" />
-    <PackageDownload Include="GitVersion.Tool" Version="[6.3.0]" />
-    <PackageDownload Include="ReportGenerator" Version="[5.4.8]" />
+    <PackageDownload Condition="'$(UsingDabaseProvider)' == 'true'" Include="dotnet-ef" Version="[10.0.10]"/>
+    <PackageDownload Condition="'$(UsingSonarQube)' == 'true'" Include="dotnet-sonarscanner" Version="[11.2.1]"/>
+    <PackageDownload Include="GitVersion.Tool" Version="[6.8.2]"/>
+    <PackageDownload Include="ReportGenerator" Version="[5.5.10]"/>
   </ItemGroup>
 
 </Project>

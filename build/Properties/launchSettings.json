@@ -53,37 +53,37 @@
       "dotnetRunMessages": true,
       "commandLineArgs": "--target Pack --no-logo"
     },
-    "Migrate.MigrationAdd": {
+    "Migrate.Migration:Add": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "commandLineArgs": "--target MigrationAdd --no-logo"
     },
-    "Migrate.MigrationRemove": {
+    "Migrate.Migration:Remove": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "commandLineArgs": "--target MigrationRemove --no-logo"
     },
-    "Migrate.MigrationOutput": {
+    "Migrate.Migration:Output": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "commandLineArgs": "--target MigrationOutput --no-logo"
     },
-    "Migrate.DatabaseUpdate": {
+    "Migrate.Database:Update": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "commandLineArgs": "--target DatabaseUpdate --no-logo"
     },
-    "Migrate.DatabaseClear": {
+    "Migrate.Database:Clear": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "commandLineArgs": "--target DatabaseClear --no-logo"
     },
-    "Migrate.DatabaseRollback": {
+    "Migrate.Database:Rollback": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "commandLineArgs": "--target DatabaseRollback --no-logo"
     },
-    "Migrate.DbContextOptimize": {
+    "Migrate.DbContext:Optimize": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "commandLineArgs": "--target DbContextOptimize --no-logo"

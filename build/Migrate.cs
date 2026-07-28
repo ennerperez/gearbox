@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using ConfigurationSubstitution;
 using Microsoft.Extensions.Configuration;
 using Nuke.Common;
+using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
@@ -18,17 +19,20 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 public partial class Build
 {
     [Parameter("The project is also known as the target project because it's where the commands add or remove files.")]
-    public readonly string TargetProject;
+    public readonly string[] TargetProjects;
 
     [Parameter("The startup project is the one that the tools build and run.")]
     public readonly string StartupProject;
 
-    Project Target => Solution.AllProjects.FirstOrDefault(m => m.Name == TargetProject);
+    [Parameter("The migration prefix is used to identify the migration files.")]
+    public readonly string MigrationPrefix = "M";
+
+    Project[] Targets => Solution.AllProjects.Where(m => TargetProjects.Contains(m.Name)).ToArray();
     Project Startup => Solution.AllProjects.FirstOrDefault(m => m.Name == StartupProject);
 
-    static string MigrationsPath => "Migrations";
+    static string MigrationsPath => Path.Combine("Databases", "Migrations");
 
-    static string ScriptsPath => "Scripts";
+    static string ScriptsPath => Path.Combine("Databases", "Scripts");
 
     IEnumerable<ConnectionStringRecord> GetConnectionStringsCombinations()
     {
@@ -54,10 +58,7 @@ public partial class Build
         {
             var projects = Solution.AllProjects
                 .Where(m => !m.Name.StartsWith('.'))
-                .Where(m => new[]
-                {
-                    Target, Startup
-                }.Contains(m))
+                .Where(m => Targets.Concat([Startup]).Contains(m))
                 .ToArray();
             DotNetBuild(s => s
                 .SetWarningLevel(0)
@@ -73,16 +74,22 @@ public partial class Build
         {
             var combinations = GetConnectionStringsCombinations()
                 .Where(IsDbContextRecord);
+            var name = $"{MigrationPrefix}{DateTime.Now.Ticks}";
             foreach (var item in combinations)
             {
+                var targets = Targets.Where(m => m.Name.EndsWith(item.Provider)).ToArray();
+                if (targets.Length == 0) { continue; }
+
                 EntityFrameworkTasks.EntityFrameworkMigrationsAdd(c => c
                     .SetProcessWorkingDirectory(RootDirectory)
                     .EnableNoBuild()
-                    .SetProject(Target)
                     .SetStartupProject(Startup)
-                    .SetName($"M{DateTime.Now.Ticks}")
+                    .SetName(name)
                     .SetContext(item.Name)
-                    .SetOutputDirectory(Path.Combine(MigrationsPath, string.IsNullOrWhiteSpace(item.Provider) ? string.Empty : item.Provider, item.Path))
+                    .SetOutputDirectory(Path.Combine(MigrationsPath, item.Path))
+                    .CombineWith(targets, configurator: (buildSettings, v) => buildSettings
+                        .SetProject(v)
+                    )
                 );
             }
         });
@@ -93,14 +100,20 @@ public partial class Build
         {
             var combinations = GetConnectionStringsCombinations()
                 .Where(IsDbContextRecord);
+
             foreach (var item in combinations)
             {
+                var targets = Targets.Where(m => m.Name.EndsWith(item.Provider)).ToArray();
+                if (targets.Length == 0) { continue; }
+
                 EntityFrameworkTasks.EntityFrameworkMigrationsRemove(c => c
                     .SetProcessWorkingDirectory(RootDirectory)
                     .EnableNoBuild()
-                    .SetProject(Target)
                     .SetStartupProject(Startup)
                     .SetContext(item.Name)
+                    .CombineWith(targets, configurator: (buildSettings, v) => buildSettings
+                        .SetProject(v)
+                    )
                 );
             }
         });
@@ -109,28 +122,58 @@ public partial class Build
         .DependsOn(FastCompile)
         .Executes(() =>
         {
+            var scriptsDir = (OutputDirectory / "scripts");
+            scriptsDir.CreateDirectory();
+
+            var bundlesDir = (OutputDirectory / "bundles");
+            bundlesDir.CreateDirectory();
+
+            var stamp = DateTime.UtcNow.ToString("yyyyMMdd");
+
             var combinations = GetConnectionStringsCombinations()
-                                .Where(IsDbContextRecord)
-                                .Where(i => !string.IsNullOrWhiteSpace(i.Provider))
-                                .Where(i => !string.Equals(i.Provider, "Sqlite", StringComparison.OrdinalIgnoreCase));
+                .Where(IsDbContextRecord);
+
             foreach (var item in combinations)
             {
-                var provider = string.IsNullOrWhiteSpace(item.Provider) ? "Unknown" : item.Provider;
-                var fileName = Path.Combine(Target?.Directory ?? string.Empty, ScriptsPath, provider, item.Path, $"{DateTime.Now:yyyyMMdd}.sql");
-                if (File.Exists(fileName))
+                if (!string.Equals(item.Provider, "Sqlite", StringComparison.OrdinalIgnoreCase))
                 {
-                    File.Delete(fileName);
-                }
+                    var scriptFile = (scriptsDir / $"{item.Provider}_{item.Name}_{stamp}.sql");
+                    scriptFile.DeleteFile();
 
-                EntityFrameworkTasks.EntityFrameworkMigrationsScript(c => c
-                    .SetProcessWorkingDirectory(RootDirectory)
-                    .EnableIdempotent()
-                    .EnableNoBuild()
-                    .SetProject(Target)
-                    .SetStartupProject(Startup)
-                    .SetContext(item.Name)
-                    .SetOutput(fileName)
-                );
+                    var targets = Targets.Where(m => m.Name.EndsWith(item.Provider)).ToArray();
+                    if (targets.Length == 0) { continue; }
+
+                    EntityFrameworkTasks.EntityFrameworkMigrationsScript(c => c
+                        .SetProcessWorkingDirectory(RootDirectory)
+                        .EnableIdempotent()
+                        .EnableNoBuild()
+                        .SetStartupProject(Startup)
+                        .SetContext(item.Name)
+                        .SetOutput(scriptFile)
+                        .CombineWith(targets, configurator: (buildSettings, v) => buildSettings
+                            .SetProject(v)
+                        )
+                    );
+                }
+                else if (string.Equals(item.Provider, "Sqlite", StringComparison.OrdinalIgnoreCase))
+                {
+                    var databaseFile = (bundlesDir / $"{item.Provider}_{item.Name}_{stamp}.db");
+                    databaseFile.DeleteFile();
+
+                    var targets = Targets.Where(m => m.Name.EndsWith(item.Provider)).ToArray();
+                    if (targets.Length == 0) { continue; }
+
+                    EntityFrameworkTasks.EntityFrameworkDatabaseUpdate(c => c
+                        .SetProcessWorkingDirectory(RootDirectory)
+                        .EnableNoBuild()
+                        .SetStartupProject(Startup)
+                        .SetContext(item.Name)
+                        .SetConnection($"Data Source={databaseFile}")
+                        .CombineWith(targets, configurator: (buildSettings, v) => buildSettings
+                            .SetProject(v)
+                        )
+                    );
+                }
             }
         });
 
@@ -142,12 +185,17 @@ public partial class Build
                 .Where(IsDbContextRecord);
             foreach (var item in combinations)
             {
+                var targets = Targets.Where(m => m.Name.EndsWith(item.Provider ?? string.Empty)).ToArray();
+                if (targets.Length == 0) { continue; }
+
                 EntityFrameworkTasks.EntityFrameworkDatabaseUpdate(c => c
                     .SetProcessWorkingDirectory(RootDirectory)
                     .EnableNoBuild()
-                    .SetProject(Target)
                     .SetStartupProject(Startup)
                     .SetContext(item.Name)
+                    .CombineWith(targets, configurator: (buildSettings, v) => buildSettings
+                        .SetProject(v)
+                    )
                 );
             }
         });
@@ -160,13 +208,18 @@ public partial class Build
                 .Where(IsDbContextRecord);
             foreach (var item in combinations)
             {
+                var targets = Targets.Where(m => m.Name.EndsWith(item.Provider)).ToArray();
+                if (targets.Length == 0) { continue; }
+
                 EntityFrameworkTasks.EntityFrameworkDatabaseDrop(c => c
                     .SetProcessWorkingDirectory(RootDirectory)
                     .EnableNoBuild()
                     .EnableForce()
-                    .SetProject(Target)
                     .SetStartupProject(Startup)
                     .SetContext(item.Name)
+                    .CombineWith(targets, configurator: (buildSettings, v) => buildSettings
+                        .SetProject(v)
+                    )
                 );
             }
         });
@@ -177,37 +230,41 @@ public partial class Build
         {
             var combinations = GetConnectionStringsCombinations()
                 .Where(IsDbContextRecord);
-            foreach (var item in combinations)
+            foreach (var item in combinations.Select(m => m.Name))
             {
-                var migrations = EntityFrameworkTasks.EntityFrameworkMigrationsList(c => c
-                    .SetProcessWorkingDirectory(RootDirectory)
-                    .EnableNoBuild()
-                    .SetProject(Target)
-                    .SetStartupProject(Startup)
-                    .SetContext(item.Name)
-                ).Where(m => !m.Text.EndsWith("(Pending)")).ToList();
-
-                if (migrations.Count == 0)
+                foreach (var target in Targets)
                 {
-                    continue;
-                }
+                    var migrations = EntityFrameworkTasks.EntityFrameworkMigrationsList(c => c
+                            .SetProcessWorkingDirectory(RootDirectory)
+                            .EnableNoBuild()
+                            .SetStartupProject(Startup)
+                            .SetContext(item)
+                            .SetProject(target)
+                        )
+                        .Where(m => !m.Text.EndsWith("(Pending)")).ToList();
 
-                var lastIndex = migrations.IndexOf(migrations[^1]);
-                lastIndex--;
-                if (lastIndex < 0)
-                {
-                    continue;
-                }
+                    if (migrations.Count == 0)
+                    {
+                        continue;
+                    }
 
-                var lastMigration = migrations[lastIndex].Text;
-                EntityFrameworkTasks.EntityFrameworkDatabaseUpdate(c => c
-                    .SetProcessWorkingDirectory(RootDirectory)
-                    .EnableNoBuild()
-                    .SetProject(Target)
-                    .SetStartupProject(Startup)
-                    .SetContext(item.Name)
-                    .SetMigration(lastMigration)
-                );
+                    var lastIndex = migrations.IndexOf(migrations[^1]);
+                    lastIndex--;
+                    if (lastIndex < 0)
+                    {
+                        continue;
+                    }
+
+                    var lastMigration = migrations[lastIndex].Text;
+                    EntityFrameworkTasks.EntityFrameworkDatabaseUpdate(c => c
+                        .SetProcessWorkingDirectory(RootDirectory)
+                        .EnableNoBuild()
+                        .SetStartupProject(Startup)
+                        .SetContext(item)
+                        .SetMigration(lastMigration)
+                        .SetProject(target)
+                    );
+                }
             }
         });
 
@@ -252,7 +309,6 @@ public partial class Build
         result.Provider = pv.Groups[2].Value.Trim();
         result.Value = value;
         return result;
-
     }
 
     [GeneratedRegex(@"(.*)\[(.*)\]\.?(\w+)?", RegexOptions.Compiled)]
