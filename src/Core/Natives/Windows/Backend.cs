@@ -19,6 +19,7 @@ namespace Gearbox.Core.Natives.Windows
     {
         private readonly INotificationService _notificationService;
         private readonly ILogger<IBackend> _logger;
+        private readonly AssemblyMetadata _metadata = Assembly.GetEntryAssembly().ReadMetadata();
 
         public Backend(INotificationService notificationService, ILogger<IBackend> logger)
         {
@@ -53,13 +54,13 @@ namespace Gearbox.Core.Natives.Windows
             var appReg = Registry.CurrentUser.CreateSubKey(AppKey);
             RegisterCapabilities(appReg);
 
-            _registerKey?.SetValue(AssemblyMetadata.Product, CapabilityKey);
+            _registerKey?.SetValue(_metadata.Product, CapabilityKey);
 
             HandleUrls();
             OpenSettings();
 
-            _logger.LogInformation("Please set {Product} as the default browser in Settings.", AssemblyMetadata.Product);
-            _notificationService.ShowAsync(new Notification("Register as deafult browser.", $"Please set {AssemblyMetadata.Product} as the default browser in Settings."));
+            _logger.LogInformation("Please set {Product} as the default browser in Settings.", _metadata.Product);
+            _notificationService.ShowAsync(new Notification("Register as default browser.", $"Please set {_metadata.Product} as the default browser in Settings."));
             return Task.FromResult(true);
         }
 
@@ -72,8 +73,8 @@ namespace Gearbox.Core.Natives.Windows
                 return;
             }
 
-            handlerReg.SetValue(string.Empty, AssemblyMetadata.Product ?? string.Empty);
-            handlerReg.SetValue("FriendlyTypeName", AssemblyMetadata.Product ?? string.Empty);
+            handlerReg.SetValue(string.Empty, _metadata.Product ?? string.Empty);
+            handlerReg.SetValue("FriendlyTypeName", _metadata.Product ?? string.Empty);
             handlerReg.CreateSubKey("shell\\open\\command").SetValue("", AppOpenUrlCommand);
         }
 
@@ -97,23 +98,23 @@ namespace Gearbox.Core.Natives.Windows
                 case RegisterStatus.Updated:
                     await UnregisterAsync(); // Unregister the old path
                     await RegisterAsync(); // Register with the new path
-                    await _notificationService.ShowAsync(new Notification("Updated location", $"{AssemblyMetadata.Product} has been re-registered with a new path."));
+                    await _notificationService.ShowAsync(new Notification("Updated location", $"{_metadata.Product} has been re-registered with a new path."));
                     return true;
             }
             return false;
         }
 
-        public void OpenSettings() => Process.Start(new ProcessStartInfo { FileName = $"ms-settings:defaultapps?registeredAppUser={AssemblyMetadata.Product}", UseShellExecute = true });
+        public void OpenSettings() => Process.Start(new ProcessStartInfo { FileName = $"ms-settings:defaultapps?registeredAppUser={_metadata.Product}", UseShellExecute = true });
         public void StartHost()
         {
-            var background = Process.GetProcessesByName($"{AssemblyMetadata.Product ?? "Gearbox"}.Host");
+            var background = Process.GetProcessesByName($"{_metadata.Product ?? "Gearbox"}.Host");
             if (background.Length != 0)
             {
                 return;
             }
 
             _logger.LogWarning("Host is not running.");
-            var hostPath = Path.Combine(AppContext.BaseDirectory, $"{AssemblyMetadata.Product ?? "Gearbox"}.Host.exe");
+            var hostPath = Path.Combine(AppContext.BaseDirectory, $"{_metadata.Product ?? "Gearbox"}.Host.exe");
             if (File.Exists(hostPath))
             {
                 _logger.LogInformation("Starting host at {HostPath}", hostPath);
@@ -136,10 +137,10 @@ namespace Gearbox.Core.Natives.Windows
             }
         }
 
-        private string AppOpenUrlCommand => AssemblyMetadata.Assembly?.Replace(".dll", ".exe", StringComparison.InvariantCultureIgnoreCase) + " %1";
-        private string AppKey => $"SOFTWARE\\{AssemblyMetadata.Product}";
-        private string UrlKey => $"SOFTWARE\\Classes\\{AssemblyMetadata.Product}URL";
-        private string CapabilityKey => $"SOFTWARE\\{AssemblyMetadata.Product}\\Capabilities";
+        private string AppOpenUrlCommand => _metadata.Assembly?.Replace(".dll", ".exe", StringComparison.InvariantCultureIgnoreCase) + " %1";
+        private string AppKey => $"SOFTWARE\\{_metadata.Product}";
+        private string UrlKey => $"SOFTWARE\\Classes\\{_metadata.Product}URL";
+        private string CapabilityKey => $"SOFTWARE\\{_metadata.Product}\\Capabilities";
 
         private readonly RegistryKey _registerKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\RegisteredApplications", true);
 
@@ -155,9 +156,9 @@ namespace Gearbox.Core.Natives.Windows
                 return;
             }
 
-            capabilityReg.SetValue("ApplicationName", AssemblyMetadata.Product ?? string.Empty);
-            capabilityReg.SetValue("ApplicationIcon", $"{AssemblyMetadata.Assembly?.Replace(".dll", ".exe", StringComparison.InvariantCultureIgnoreCase)},0");
-            capabilityReg.SetValue("ApplicationDescription", AssemblyMetadata.Description ?? string.Empty);
+            capabilityReg.SetValue("ApplicationName", _metadata.Product ?? string.Empty);
+            capabilityReg.SetValue("ApplicationIcon", $"{_metadata.Assembly?.Replace(".dll", ".exe", StringComparison.InvariantCultureIgnoreCase)},0");
+            capabilityReg.SetValue("ApplicationDescription", _metadata.Description ?? string.Empty);
 
             // Set up protocols we want to handle.
             var urlAssocReg = capabilityReg.CreateSubKey("URLAssociations");
@@ -167,10 +168,10 @@ namespace Gearbox.Core.Natives.Windows
                 return;
             }
 
-            urlAssocReg.SetValue("http", AssemblyMetadata.Product + "URL");
-            urlAssocReg.SetValue("https", AssemblyMetadata.Product + "URL");
-            urlAssocReg.SetValue("ftp", AssemblyMetadata.Product + "URL");
-            urlAssocReg.SetValue("ftps", AssemblyMetadata.Product + "URL");
+            urlAssocReg.SetValue("http", _metadata.Product + "URL");
+            urlAssocReg.SetValue("https", _metadata.Product + "URL");
+            urlAssocReg.SetValue("ftp", _metadata.Product + "URL");
+            urlAssocReg.SetValue("ftps", _metadata.Product + "URL");
         }
     }
 }

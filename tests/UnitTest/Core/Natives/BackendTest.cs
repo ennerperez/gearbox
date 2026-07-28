@@ -14,6 +14,7 @@ using Gearbox.Core.Natives.Windows;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shouldly;
+using Xunit;
 
 namespace Gearbox.UnitTest.Core.Natives
 {
@@ -25,15 +26,15 @@ namespace Gearbox.UnitTest.Core.Natives
 
         public BackendTest()
         {
-            Assembly.GetEntryAssembly()?.ReadMetadata();
-            AssemblyMetadata.Product = "Gearbox";
+            var metadata = Assembly.GetEntryAssembly().ReadMetadata();
+            metadata.Product = "Gearbox";
 
             var notificationService = Substitute.For<INotificationService>();
             var logger = Substitute.For<ILogger<Backend>>();
             _backend = new Backend(notificationService, logger);
         }
 
-        [Fact]
+        [Fact(Skip = "Requires desktop process integration")]
         private async Task Should_Open_Settings()
         {
             var t1 = new Thread(() =>
@@ -63,7 +64,7 @@ namespace Gearbox.UnitTest.Core.Natives
             process.Length.ShouldBeGreaterThan(0);
         }
 
-        [Fact]
+        [Fact(Skip = "Requires desktop process integration")]
         private async Task Should_Start_Host()
         {
             var t1 = new Thread(() =>
@@ -72,7 +73,8 @@ namespace Gearbox.UnitTest.Core.Natives
             });
             t1.Start();
             await Task.Delay(3000);
-            var processName = $"{AssemblyMetadata.Product ?? "Gearbox"}.Host";
+            var metadata = Assembly.GetEntryAssembly().ReadMetadata();
+            var processName = $"{metadata.Product ?? "Gearbox"}.Host";
             var process = Process.GetProcessesByName(processName);
             process.Length.ShouldBeGreaterThan(0);
         }

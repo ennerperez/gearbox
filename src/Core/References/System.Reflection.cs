@@ -122,26 +122,33 @@ namespace System.Reflection
 
             return s_informationalVersion;
         }
+
+        public static AssemblyMetadata ReadMetadata(this Assembly? assembly, string variableName = "DOTNET_ENVIRONMENT")
+        {
+            var result = new AssemblyMetadata();
+            result.Read(assembly ?? Assembly.GetExecutingAssembly(), variableName);
+            return result;
+        }
     }
 
     [ExcludeFromCodeCoverage]
-    public static partial class AssemblyMetadata
+    public partial class AssemblyMetadata
     {
         #region Metadata
 
-        public static string? Product { get; internal set; }
-        public static string? DisplayVersion { get; private set; }
-        public static Version? Version { get; private set; }
-        public static string? Commit { get; private set; }
-        public static string? Tag { get; private set; }
-        public static string? Environment { get; private set; }
-        public static string? Assembly { get; private set; }
-        public static string? Description { get; private set; }
+        public string? Product { get; internal set; }
+        public string? DisplayVersion { get; private set; }
+        public Version? Version { get; private set; }
+        public string? Commit { get; private set; }
+        public string? Tag { get; private set; }
+        public string? Environment { get; private set; }
+        public string? Assembly { get; private set; }
+        public string? Description { get; private set; }
 
         [GeneratedRegex(@"v?\=?((?:[0-9]{1,}\.{0,}){1,})\-?(.*)?\+(.*)", RegexOptions.Compiled)]
-        private static partial Regex InformationalVersionRegex();
+        private partial Regex InformationalVersionRegex();
 
-        internal static void Read(Assembly assembly, string variableName = "DOTNET_ENVIRONMENT")
+        internal void Read(Assembly assembly, string variableName = "DOTNET_ENVIRONMENT")
         {
             Product = assembly.Product();
             Description = assembly.Description();
@@ -155,7 +162,7 @@ namespace System.Reflection
                 {
                     Version = Version.Parse(versionMatch.Groups[1].Value);
                     Tag = versionMatch.Groups[2].Value;
-                    Commit = versionMatch.Groups[3].Value[..7];
+                    Commit = versionMatch.Groups[3].Value;
                     DisplayVersion = string.Join("-", new[] { Version.ToString(3), Tag }.Where(m => !string.IsNullOrWhiteSpace(m)));
                 }
             }
@@ -179,11 +186,6 @@ namespace System.Reflection
 #endif
                 System.Environment.SetEnvironmentVariable(variableName, Environment);
             }
-        }
-
-        public static void ReadMetadata(this Assembly assembly, string variableName = "DOTNET_ENVIRONMENT")
-        {
-            Read(assembly, variableName);
         }
 
         #endregion

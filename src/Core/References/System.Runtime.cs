@@ -46,15 +46,16 @@ namespace System.Runtime
 
         public static string GetDataDir()
         {
+            var metadata = Assembly.GetEntryAssembly().ReadMetadata();
             string dataDir;
             var osAppDataDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             if (string.IsNullOrEmpty(osAppDataDir))
             {
-                dataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), $".{AssemblyMetadata.Product?.ToLower(Globalization.CultureInfo.CurrentCulture)}");
+                dataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), $".{metadata.Product?.ToLower(Globalization.CultureInfo.CurrentCulture)}");
             }
             else
             {
-                dataDir = Path.Combine(osAppDataDir, AssemblyMetadata.Product ?? string.Empty);
+                dataDir = Path.Combine(osAppDataDir, metadata.Product ?? string.Empty);
             }
 
             if (!Directory.Exists(dataDir))
@@ -112,11 +113,13 @@ namespace System.Runtime
         /// </summary>
         /// <remarks>The development environment can enable features that shouldn't be exposed in production. Because of the performance cost, scope validation and dependency validation only happens in development.</remarks>
         public static readonly string Development = "Development";
+
         /// <summary>
         /// Specifies the Staging environment.
         /// </summary>
         /// <remarks>The staging environment can be used to validate app changes before changing the environment to production.</remarks>
         public static readonly string Staging = "Staging";
+
         /// <summary>
         /// Specifies the Production environment.
         /// </summary>

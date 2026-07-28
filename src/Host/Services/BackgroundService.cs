@@ -16,6 +16,7 @@ namespace Gearbox.Host.Services
         private readonly IBrowserService _browserService;
         private readonly ILogger<BackgroundService> _logger;
         private readonly IQueueService _queueService;
+        private readonly AssemblyMetadata _metadata = Assembly.GetEntryAssembly().ReadMetadata();
 
         public BackgroundService(IBackend backend, IBrowserService browserService, IQueueService queueService, ILogger<BackgroundService> logger)
         {
@@ -43,7 +44,7 @@ namespace Gearbox.Host.Services
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var cmd = await _queueService.ReceiveMessageAsync(AssemblyMetadata.Product ?? "Gearbox", cancellationToken: stoppingToken);
+                var cmd = await _queueService.ReceiveMessageAsync(_metadata.Product ?? "Gearbox", cancellationToken: stoppingToken);
                 if (cmd != null)
                 {
                     var forceRegisterCommandMatch = RegisterCommandRegex().Match(cmd.MessageText);

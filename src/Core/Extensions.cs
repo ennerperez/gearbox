@@ -16,7 +16,8 @@ namespace Gearbox.Core
     {
         public static IServiceCollection AddPersistence(this IServiceCollection serviceCollection)
         {
-            var cs = new ConnectionString(Path.Combine(OS.GetDataDir(), $"{AssemblyMetadata.Product ?? "Gearbox"}.qdb"))
+            var metadata = Assembly.GetEntryAssembly().ReadMetadata();
+            var cs = new ConnectionString(Path.Combine(OS.GetDataDir(), $"{metadata.Product ?? "Gearbox"}.qdb"))
             {
                 Connection = ConnectionType.Shared
             };

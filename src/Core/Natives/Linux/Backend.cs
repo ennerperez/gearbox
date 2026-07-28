@@ -18,6 +18,7 @@ namespace Gearbox.Core.Natives.Linux
     {
         private readonly INotificationService _notificationService;
         private readonly ILogger<IBackend> _logger;
+        private readonly AssemblyMetadata _metadata = Assembly.GetEntryAssembly().ReadMetadata();
 
         public Backend(INotificationService notificationService, ILogger<Backend> logger)
         {
@@ -34,18 +35,18 @@ namespace Gearbox.Core.Natives.Linux
         public RegisterStatus GetRegisterStatus()
         {
             var currentValue = Xdg.GetSetting(Xdg.DEFAULT_WEB_BROWSER);
-            return currentValue == $"{AssemblyMetadata.Product}.desktop" ? RegisterStatus.Registered : RegisterStatus.Unregistered;
+            return currentValue == $"{_metadata.Product}.desktop" ? RegisterStatus.Registered : RegisterStatus.Unregistered;
         }
 
         public Task<bool> RegisterAsync()
         {
             _logger.LogInformation("Registering...");
 
-            HandleUrls($"{AssemblyMetadata.Product}.desktop");
+            HandleUrls($"{_metadata.Product}.desktop");
             OpenSettings();
 
-            _logger.LogInformation("Please set {Product} as the default browser in Settings.", AssemblyMetadata.Product);
-            _notificationService.ShowAsync(new Notification("Register as deafult browser.", $"Please set {AssemblyMetadata.Product} as the default browser in Settings."));
+            _logger.LogInformation("Please set {Product} as the default browser in Settings.", _metadata.Product);
+            _notificationService.ShowAsync(new Notification("Register as default browser.", $"Please set {_metadata.Product} as the default browser in Settings."));
             return Task.FromResult(true);
         }
 
@@ -90,7 +91,7 @@ namespace Gearbox.Core.Natives.Linux
                 case RegisterStatus.Updated:
                     await UnregisterAsync(); // Unregister the old path
                     await RegisterAsync(); // Register with the new path
-                    await _notificationService.ShowAsync(new Notification("Updated location", $"{AssemblyMetadata.Product} has been re-registered with a new path."));
+                    await _notificationService.ShowAsync(new Notification("Updated location", $"{_metadata.Product} has been re-registered with a new path."));
                     return true;
             }
 
@@ -115,14 +116,14 @@ namespace Gearbox.Core.Natives.Linux
 
         public void StartHost()
         {
-            var background = Process.GetProcessesByName($"{AssemblyMetadata.Product ?? "Gearbox"}.Host");
+            var background = Process.GetProcessesByName($"{_metadata.Product ?? "Gearbox"}.Host");
             if (background.Length != 0)
             {
                 return;
             }
 
             _logger.LogWarning("Host is not running.");
-            var hostPath = Path.Combine(AppContext.BaseDirectory, $"{AssemblyMetadata.Product ?? "Gearbox"}.Host");
+            var hostPath = Path.Combine(AppContext.BaseDirectory, $"{_metadata.Product ?? "Gearbox"}.Host");
             if (File.Exists(hostPath))
             {
                 _logger.LogInformation("Starting host at {HostPath}", hostPath);

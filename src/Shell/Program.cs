@@ -26,9 +26,8 @@ namespace Gearbox.Shell
         [STAThread]
         public static async Task Main(string[] args)
         {
-            Assembly.GetEntryAssembly()?.ReadMetadata();
-
-            var mutex = new Mutex(true, AssemblyMetadata.Product, out var result);
+            var metadata = Assembly.GetEntryAssembly().ReadMetadata();
+            var mutex = new Mutex(true, metadata.Product, out var result);
             if (!result)
             {
                 Environment.Exit(1);
@@ -63,7 +62,7 @@ namespace Gearbox.Shell
                 .Enrich.WithProcessName()
                 .Enrich.WithThreadId()
                 .Enrich.WithThreadName()
-                .Enrich.WithProperty("ApplicationName", AssemblyMetadata.Product);
+                .Enrich.WithProperty("ApplicationName", metadata.Product);
 
             // Initialize Logger
             Log.Logger = loggerConfiguration
