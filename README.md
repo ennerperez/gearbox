@@ -1,6 +1,6 @@
 ![logo](.editoricon.png)
 
-# Gearbox - Cross-platform rule based browser launcher
+# Gearbox - Cross-platform rule-based browser launcher
 
 [![license](https://img.shields.io/github/license/ennerperez/gearbox.svg)](LICENSE)
 [![latest](https://img.shields.io/github/v/release/ennerperez/gearbox.svg)](https://github.com/ennerperez/gearbox/releases/latest)
@@ -9,7 +9,6 @@
 ## Highlights
 * Supports Windows/macOS/Linux
 * Opensource/Free
-
 
 ---------------------------------------
 
@@ -55,7 +54,7 @@ No more contributing information for now.
 
 ### Documentation
 
-No more documentation required for now.
+No more documentation is required for now.
 
 ### License
 
