@@ -50,8 +50,8 @@ namespace Gearbox.Core.Services
                 var typesPreferences = new Dictionary<string, string>();
                 _configuration.Bind("types", typesPreferences);
 
-                var urlMatchKey = urlPreferences.FirstOrDefault(m => new Regex(m.Key.Replace("*", ".*", StringComparison.InvariantCultureIgnoreCase)).Match(url).Success).Key;
-                var sourceMatchKey = sourcePreferences.FirstOrDefault(m => new Regex(m.Key.Replace("*", ".*", StringComparison.InvariantCultureIgnoreCase)).Match(windowTitle).Success).Key;
+                var urlMatchKey = urlPreferences.FirstOrDefault(m => new Regex(m.Key.Replace("*", ".*", StringComparison.InvariantCultureIgnoreCase)).IsMatch(url)).Key;
+                var sourceMatchKey = sourcePreferences.FirstOrDefault(m => new Regex(m.Key.Replace("*", ".*", StringComparison.InvariantCultureIgnoreCase)).IsMatch(windowTitle)).Key;
                 var typeMatchKey = typesPreferences.FirstOrDefault(m => url.EndsWith(m.Key.Replace("*.", ".", StringComparison.InvariantCultureIgnoreCase), StringComparison.InvariantCultureIgnoreCase)).Key;
 
                 var value = _configuration["general:default"] ?? string.Empty;
@@ -186,7 +186,7 @@ namespace Gearbox.Core.Services
             {
                 if (!ProcessX.AcceptableExitCodes.Contains(ex.ExitCode))
                 {
-                    _logger.LogDebug("ERROR, ExitCode: {ExitCode}", ex.ExitCode);
+                    _logger.LogDebug(ex, "ERROR, ExitCode: {ExitCode}", ex.ExitCode);
                     throw;
                 }
             }
