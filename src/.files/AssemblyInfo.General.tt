@@ -6,14 +6,14 @@ using System.Resources;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyCompany("Enner Pérez")]
-[assembly: AssemblyProduct("Gearbox")]
-[assembly: AssemblyCopyright("Enner Pérez © <#= _year #> All rights reserved.")]
+[assembly: AssemblyCompany("Alpaka Software")]
+[assembly: AssemblyProduct("Spark")]
+[assembly: AssemblyCopyright("Copyright © <#= _year #>")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: NeutralResourcesLanguage("en")]
 
 <#+
-    private readonly int _year = DateTime.Now.Year;
+    private readonly int _year = DateTime .Now .Year;
 #>

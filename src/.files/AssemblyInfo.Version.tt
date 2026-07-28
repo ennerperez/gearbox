@@ -17,5 +17,5 @@ using System.Reflection;
 [assembly: AssemblyInformationalVersion("1.0.0+0")]
 
 <#+
-    private readonly int _revisionNumber = ( int ) (DateTime.UtcNow - new DateTime(2025, 01, 01)).TotalDays;
+    private readonly int _revisionNumber = ( int ) (DateTime .UtcNow - new DateTime (2026, 01, 01)) .TotalDays;
 #>
