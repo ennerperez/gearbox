@@ -6,6 +6,7 @@ using Gearbox.Core.Interfaces;
 using Gearbox.Core.Models;
 using Gearbox.Core.Types;
 using Gearbox.Host.Services;
+using Xunit;
 
 namespace Gearbox.UnitTest.Host
 {

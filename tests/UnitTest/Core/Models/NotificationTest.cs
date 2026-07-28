@@ -2,6 +2,7 @@
 using Gearbox.Core.Models;
 using Gearbox.Core.Types;
 using Shouldly;
+using Xunit;
 
 namespace Gearbox.UnitTest.Core.Models
 {

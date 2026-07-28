@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Gearbox.Core.Services;
 using Shouldly;
+using Xunit;
 
 namespace Gearbox.UnitTest.Core.Services
 {

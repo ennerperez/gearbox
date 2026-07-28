@@ -1,5 +1,6 @@
 ﻿using Gearbox.Core.Models;
 using Shouldly;
+using Xunit;
 
 namespace Gearbox.UnitTest.Core.Models
 {

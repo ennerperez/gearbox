@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shouldly;
+using Xunit;
 using OS = System.Runtime.OperatingSystemExtensions;
 
 namespace Gearbox.UnitTest.Core.Services
@@ -36,10 +37,21 @@ namespace Gearbox.UnitTest.Core.Services
             _browserService = new BrowserService(notificationService, configuration, backend, logger);
         }
 
+        public static TheoryData<Uri> BrowserUrls => new()
+        {
+            new Uri("https://google.com"),
+            new Uri("https://youtube.com"),
+            new Uri("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")
+        };
+
+        public static TheoryData<Uri, string> SourceUrls => new()
+        {
+            { new Uri("https://google.com"), "Discord" },
+            { new Uri("https://youtube.com"), "Microsoft Teams" }
+        };
+
         [Theory]
-        [InlineData("https://google.com")]
-        [InlineData("https://youtube.com")]
-        [InlineData("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")]
+        [MemberData(nameof(BrowserUrls))]
         public async Task LaunchUrlByBrowserAsync(Uri url)
         {
             var result = await _browserService.LaunchAsync(url);
@@ -47,8 +59,7 @@ namespace Gearbox.UnitTest.Core.Services
         }
 
         [Theory]
-        [InlineData("https://google.com", "Discord")]
-        [InlineData("https://youtube.com", "Microsoft Teams")]
+        [MemberData(nameof(SourceUrls))]
         public async Task LaunchUrlBySourceAsync(Uri url, string window)
         {
             var result = await _browserService.LaunchAsync(url, window);
