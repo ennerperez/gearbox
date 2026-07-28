@@ -572,6 +572,7 @@ $RECYCLE.BIN/
 archives
 package-lock.json
 .env
+*.key
 *.private.env.json
 **/**/[Dd]ata/*.json
 **/**/[Dd]ata/*.csv
@@ -601,6 +602,7 @@ __queuestorage__
 *.db
 *.sqlite3
 *.sqlite
+!*.sqlite/
 *.db-journal
 *.sqlite3-journal
 *.sqlite-journal
@@ -612,6 +614,9 @@ __queuestorage__
 
 # Responses
 **/responses/*.*
+*.received.*
+*.received/
+docs/plan-*-*.md
 
 # Dev Containers
 .devcontainer
@@ -619,4 +624,7 @@ __queuestorage__
 
 # IA
 .junie
-
+.claude/
+.codacy/
+.cursor/
+.run/.clinerules

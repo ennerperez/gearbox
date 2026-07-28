@@ -6,6 +6,15 @@ root = true
 [*]
 indent_style = space
 
+# Verify settings
+[*.{received,verified}.{json,txt,xml}]
+end_of_line = lf
+indent_size = unset
+indent_style = unset
+insert_final_newline = false
+tab_width = unset
+trim_trailing_whitespace = false
+
 # XML project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
 indent_size = 2
@@ -48,7 +57,7 @@ tab_width = 4
 indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
-charset = utf-8-bom
+charset = utf-8
 
 ###############################
 # .NET Coding Conventions     #
@@ -57,10 +66,10 @@ charset = utf-8-bom
 # Organize usings
 dotnet_sort_system_directives_first = true
 # this. preferences
-dotnet_style_qualification_for_field = false:warning
-dotnet_style_qualification_for_property = true:silent
-dotnet_style_qualification_for_method = false:silent
-dotnet_style_qualification_for_event = false:silent
+dotnet_style_qualification_for_field = false:error
+dotnet_style_qualification_for_property = false:error
+dotnet_style_qualification_for_method = false:error
+dotnet_style_qualification_for_event = false:error
 # Language keywords vs BCL types preferences
 dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
 dotnet_style_predefined_type_for_member_access = true:suggestion
@@ -103,7 +112,11 @@ generated_code = true
 
 generated_code = true
 
-[*.Designer.cs]
+[**/*.Designer.cs]
+
+generated_code = true
+
+[**/*.sg.cs]
 
 generated_code = true
 
@@ -165,9 +178,10 @@ dotnet_diagnostic.CA1508.severity = warning # Avoid dead conditional code
 dotnet_diagnostic.CA1859.severity = warning # Use concrete types when possible for improved performance
 dotnet_diagnostic.CA1860.severity = warning # Prefer comparing 'Count' to 0 rather than using 'Any()', both for clarity and for performance
 dotnet_diagnostic.CA2201.severity = suggestion # Exception type System.Exception is not sufficiently specific
-dotnet_diagnostic.CA1515.severity = suggestion # Consider making public types internal
+dotnet_diagnostic.CA1515.severity = none # Consider making public types internal
 dotnet_diagnostic.CA1812.severity = suggestion # Avoid uninstantiated internal classes
 dotnet_diagnostic.CA1308.severity = suggestion # CA1308: Normalize strings to uppercase
+dotnet_diagnostic.CA1056.severity = suggestion # CA1056: URI properties should not be strings
 
 dotnet_diagnostic.IDE0001.severity = warning # Simplify name
 dotnet_diagnostic.IDE0005.severity = error # Remove unnecessary using directives
@@ -431,4 +445,12 @@ resharper_max_attribute_length_for_same_line = 70
 resharper_place_accessorholder_attribute_on_same_line = false
 resharper_place_method_attribute_on_same_line = if_owner_is_single_line
 
-
+[*.feature]
+charset = utf-8
+gherkin_indent_feature_children = true
+gherkin_indent_steps = true
+gherkin_indent_datatable = true
+gherkin_indent_docstring = true
+gherkin_indent_examples_table = true
+gherkin_table_cell_padding_size = 2
+gherkin_table_cell_right_align_numeric_content = true
