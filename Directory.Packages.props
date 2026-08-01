@@ -10,7 +10,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
     <TargetFrameworkPackageVersion>10.0.10</TargetFrameworkPackageVersion>
-    <AvaloniaPackageVersion>12.1.0</AvaloniaPackageVersion>
+    <AvaloniaPackageVersion>12.1.1</AvaloniaPackageVersion>
     <SkiaSharpPackageVersion>4.150.1</SkiaSharpPackageVersion>
     <BuildPackageVersion>18.8.2</BuildPackageVersion>
     <NoWarn>$(NoWarn);NU1507</NoWarn>
