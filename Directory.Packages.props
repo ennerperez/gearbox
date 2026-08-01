@@ -11,7 +11,7 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
     <TargetFrameworkPackageVersion>10.0.10</TargetFrameworkPackageVersion>
     <AvaloniaPackageVersion>12.1.0</AvaloniaPackageVersion>
-    <SkiaSharpPackageVersion>4.150.1</SkiaSharpPackageVersion>
+    <SkiaSharpPackageVersion>4.151.0</SkiaSharpPackageVersion>
     <BuildPackageVersion>18.8.2</BuildPackageVersion>
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
