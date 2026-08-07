@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.Tasks;
+using Gearbox.Core.Models;
 using Gearbox.Core.Services;
 using Shouldly;
 using Xunit;
@@ -44,6 +45,24 @@ namespace Gearbox.UnitTest.Core.Services
             message.ShouldNotBeNull();
             message.MessageText.ShouldNotBeNullOrWhiteSpace();
             //messages.ShouldNotBeNull();
+        }
+
+        [Fact(Skip = "MemoryQueueService.DeleteMessageAsync is not implemented in this branch. Enable when behavior lands.")]
+        public async Task DeleteMessageAsyncRemovesPeekedMessage()
+        {
+            var queueName = Guid.NewGuid().ToString();
+            var deletedContent = Guid.NewGuid().ToString();
+            var remainingContent = Guid.NewGuid().ToString();
+
+            await _queueService.SendMessageAsync(queueName, deletedContent);
+            await _queueService.SendMessageAsync(queueName, remainingContent);
+
+            var message = (QueueMessage)await _queueService.PeekMessageAsync(queueName);
+
+            await _queueService.DeleteMessageAsync(message, queueName);
+
+            var remaining = await _queueService.ReceiveMessageAsync(queueName);
+            remaining.MessageText.ShouldBe(remainingContent);
         }
     }
 }

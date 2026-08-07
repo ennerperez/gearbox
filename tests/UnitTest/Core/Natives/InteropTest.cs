@@ -1,12 +1,17 @@
-﻿namespace Gearbox.UnitTest.Core.Natives
+﻿using System.Runtime.Versioning;
+using Gearbox.Core.Natives.Linux.Interop;
+using Shouldly;
+using Xunit;
+
+namespace Gearbox.UnitTest.Core.Natives
 {
     public class InteropTest
     {
 #if LINUX
 
         [SupportedOSPlatform("linux")]
-        [Fact]
-        public void Should_Get_Setting_Value()
+        [Fact(Skip = "Requires Linux desktop xdg-settings integration.")]
+        public void ShouldGetSettingValue()
         {
             var currentValue = Xdg.GetSetting(Xdg.DEFAULT_WEB_BROWSER);
             currentValue.ShouldNotBeNullOrEmpty();
@@ -14,8 +19,8 @@
         }
 
         [SupportedOSPlatform("linux")]
-        [Fact]
-        public void Should_Get_Active_Windows_Name()
+        [Fact(Skip = "Requires Linux desktop xdotool integration.")]
+        public void ShouldGetActiveWindowsName()
         {
             var activeWindowName = Xdo.GetActiveWindowName();
             activeWindowName.ShouldNotBeNullOrEmpty();

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using Gearbox.Core.Interfaces;
 #if LINUX
 using Gearbox.Core.Natives.Linux;
+using Gearbox.Core.Natives.Linux.Interop;
 #elif OSX
 using Gearbox.Core.Natives.MacOS;
 #elif WINDOWS
