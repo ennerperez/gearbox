@@ -50,7 +50,8 @@ namespace Gearbox.Shell
             }
             else
             {
-                //TODO: OSX once implemented/stable
+                manager = new FallbackNotificationManager();
+                services.AddSingleton(manager);
             }
 
             services.AddTransient<INotificationService, NotificationService>();
