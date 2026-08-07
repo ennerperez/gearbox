@@ -10,7 +10,18 @@ namespace Gearbox.Core.Natives.MacOS.Interop
     {
         public static string GetActiveWindowName()
         {
-            using var process = Process.Start(new ProcessStartInfo() { FileName = "xdotool", Arguments = "getactivewindow getwindowname", RedirectStandardOutput = true });
+            using var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = "/usr/bin/osascript",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                ArgumentList =
+                {
+                    "-e",
+                    "tell application \"System Events\" to tell (first application process whose frontmost is true) to if exists (front window) then get name of front window else get name"
+                }
+            });
             var result = process?.StandardOutput.ReadToEnd().Trim();
             return result ?? string.Empty;
         }

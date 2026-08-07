@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using Gearbox.Core.Interfaces;
+using Gearbox.Core.Natives.MacOS.Interop;
 using Gearbox.Core.Types;
 using Microsoft.Extensions.Logging;
 using Notification = Gearbox.Core.Models.Notification;
@@ -27,25 +30,18 @@ namespace Gearbox.Core.Natives.MacOS
 
         public string GetActiveWindowTitle()
         {
-#if OSX
-            var windowInfo = QuartzCore.CGWindowListCopyWindowInfo(CGWindowListOption.OnScreenOnly, 0);
-            var values = (NSArray)Runtime.GetNSObject<NSArray>(windowInfo);
-
-            var windowList = new List<QuartzCore.kCGWindow>();
-            for (ulong i = 0, len = values.Count; i < len; i++)
-            {
-                var window = Runtime.GetNSObject(values.ValueAt(i));
-                var item = new QuartzCore.kCGWindow();
-                item.Read(window);
-                windowList.Add(item);
-            }
-#endif
-            throw new NotImplementedException();
+            return Xdo.GetActiveWindowName();
         }
 
         public RegisterStatus GetRegisterStatus()
         {
-            throw new NotImplementedException();
+            var handlers = ReadDefaultUrlHandlers();
+            return handlers.TryGetValue("http", out var httpHandler) &&
+                   handlers.TryGetValue("https", out var httpsHandler) &&
+                   IsCurrentAppHandler(httpHandler) &&
+                   IsCurrentAppHandler(httpsHandler)
+                ? RegisterStatus.Registered
+                : RegisterStatus.Unregistered;
         }
 
         public Task<bool> RegisterAsync()
@@ -59,9 +55,15 @@ namespace Gearbox.Core.Natives.MacOS
             return Task.FromResult(true);
         }
 
-        public Task<bool> UnregisterAsync()
+        public async Task<bool> UnregisterAsync()
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Unregistering...");
+
+            OpenSettings();
+
+            _logger.LogInformation("Please choose a different default browser in Settings.");
+            await _notificationService.ShowAsync(new Notification("Change default browser.", "Please choose a different default browser in Settings."));
+            return true;
         }
 
         public async Task<bool> RegisterOrUnregisterAsync()
@@ -86,6 +88,111 @@ namespace Gearbox.Core.Natives.MacOS
         }
 
         public void OpenSettings() => Process.Start(new ProcessStartInfo { FileName = "x-apple.systempreferences:com.apple.Desktop-Settings.extension", UseShellExecute = true });
+
+        private bool IsCurrentAppHandler(string handler)
+        {
+            var product = _metadata.Product ?? "Gearbox";
+            var appName = Path.GetFileNameWithoutExtension(_metadata.Assembly) ?? product;
+            return MatchesIdentifier(handler, product) || MatchesIdentifier(handler, appName);
+        }
+
+        private static bool MatchesIdentifier(string handler, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            var identifierPart = new string(value.Where(char.IsLetterOrDigit).ToArray());
+            if (string.IsNullOrWhiteSpace(identifierPart))
+            {
+                return false;
+            }
+
+            return string.Equals(handler, value, StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(handler, identifierPart, StringComparison.OrdinalIgnoreCase) ||
+                   handler.EndsWith($".{identifierPart}", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static Dictionary<string, string> ReadDefaultUrlHandlers()
+        {
+            var output = RunProcess("/usr/bin/defaults", "read", "com.apple.LaunchServices/com.apple.launchservices.secure", "LSHandlers");
+            var handlers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            string scheme = null;
+            string handler = null;
+            foreach (var rawLine in output.Split(Environment.NewLine))
+            {
+                var line = rawLine.Trim();
+                if (line == "{")
+                {
+                    scheme = null;
+                    handler = null;
+                    continue;
+                }
+
+                if (line.StartsWith("LSHandlerURLScheme = ", StringComparison.Ordinal))
+                {
+                    scheme = TrimDefaultsValue(line["LSHandlerURLScheme = ".Length..]);
+                    continue;
+                }
+
+                if (line.StartsWith("LSHandlerRoleAll = ", StringComparison.Ordinal))
+                {
+                    handler = TrimDefaultsValue(line["LSHandlerRoleAll = ".Length..]);
+                    continue;
+                }
+
+                if (line.StartsWith("LSHandlerRoleViewer = ", StringComparison.Ordinal))
+                {
+                    handler ??= TrimDefaultsValue(line["LSHandlerRoleViewer = ".Length..]);
+                    continue;
+                }
+
+                if ((line == "}," || line == "}") &&
+                    !string.IsNullOrWhiteSpace(scheme) &&
+                    !string.IsNullOrWhiteSpace(handler))
+                {
+                    handlers[scheme] = handler;
+                }
+            }
+
+            return handlers;
+        }
+
+        private static string RunProcess(string fileName, params string[] arguments)
+        {
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = fileName,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                }
+            };
+
+            foreach (var argument in arguments)
+            {
+                process.StartInfo.ArgumentList.Add(argument);
+            }
+
+            if (!process.Start())
+            {
+                return string.Empty;
+            }
+
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            return process.ExitCode == 0 ? output : string.Empty;
+        }
+
+        private static string TrimDefaultsValue(string value)
+        {
+            return value.Trim().TrimEnd(';').Trim().Trim('"');
+        }
+
         public void StartHost()
         {
             var background = Process.GetProcessesByName($"{_metadata.Product ?? "Gearbox"}.Host");
