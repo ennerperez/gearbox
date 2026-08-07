@@ -73,6 +73,7 @@ namespace Gearbox.Shell.ViewModels
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
         public void Settings()
         {
+            _backend.OpenSettings();
         }
 
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
@@ -89,10 +90,9 @@ namespace Gearbox.Shell.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
-        public Task Register()
+        public async Task Register()
         {
-            _backend.RegisterAsync();
-            return Task.CompletedTask;
+            await _backend.RegisterAsync();
         }
 
         [RelayCommand(CanExecute = nameof(IsNotBusy))]

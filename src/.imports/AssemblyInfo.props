@@ -14,17 +14,17 @@
       <LastGenOutput>AssemblyInfo.Version.cs</LastGenOutput>
       <DependentUpon>AssemblyInfo.cs</DependentUpon>
     </None>
-    <Compile Include="$(_FilesDirectory)AssemblyInfo.General.cs" Condition="Exists('$(_FilesDirectory)AssemblyInfo.General.cs')">
+    <Compile Include="$(_FilesDirectory)AssemblyInfo.General.cs" Condition="Exists('$(_FilesDirectory)AssemblyInfo.General.cs') OR ('$(UsingAssemblyInfoTemplate)' == 'true' AND Exists('$(_FilesDirectory)AssemblyInfo.General.tt'))">
       <Link>Properties\AssemblyInfo.General.cs</Link>
       <DependentUpon Condition="'$(UsingAssemblyInfoTemplate)' == 'true' AND Exists('$(_FilesDirectory)AssemblyInfo.General.tt')">AssemblyInfo.General.tt</DependentUpon>
       <DependentUpon Condition="'$(UsingAssemblyInfoTemplate)' == 'false' OR !Exists('$(_FilesDirectory)AssemblyInfo.General.tt')">AssemblyInfo.cs</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Include="$(_FilesDirectory)AssemblyInfo.Version.cs" Condition="Exists('$(_FilesDirectory)AssemblyInfo.Version.cs')">
+    <Compile Include="$(_FilesDirectory)AssemblyInfo.Version.cs" Condition="Exists('$(_FilesDirectory)AssemblyInfo.Version.cs') OR ('$(UsingAssemblyInfoTemplate)' == 'true' AND Exists('$(_FilesDirectory)AssemblyInfo.Version.tt'))">
       <Link>Properties\AssemblyInfo.Version.cs</Link>
-      <DependentUpon Condition="'$(UsingAssemblyInfoTemplate)' == 'true' AND Exists('$(_FilesDirectory)AssemblyInfo.Version.tt')">AssemblyInfo.Version.tt</DependentUpon>
-      <DependentUpon Condition="'$(UsingAssemblyInfoTemplate)' == 'false' OR !Exists('$(_FilesDirectory)AssemblyInfo.Version.tt')">AssemblyInfo.cs</DependentUpon>
+      <DependentUpon Condition="Exists('$(_FilesDirectory)AssemblyInfo.Version.tt')">AssemblyInfo.Version.tt</DependentUpon>
+      <DependentUpon Condition="!Exists('$(_FilesDirectory)AssemblyInfo.Version.tt')">AssemblyInfo.cs</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
@@ -33,5 +33,18 @@
     <None Remove="*\AssemblyInfo.*"/>
     <Compile Remove="*\AssemblyInfo.*"/>
   </ItemGroup>
+
+  <PropertyGroup>
+    <AssemblyInfoT4Command Condition="'$(AssemblyInfoT4Command)' == ''">dotnet t4</AssemblyInfoT4Command>
+  </PropertyGroup>
+
+  <Target Name="GenerateMissingAssemblyInfoTemplates"
+          BeforeTargets="CoreCompile"
+          Condition="'$(GenerateAssemblyInfo)' == 'false' AND '$(UsingAssemblyInfoTemplate)' == 'true'">
+    <Exec Condition="Exists('$(_FilesDirectory)AssemblyInfo.General.tt') AND !Exists('$(_FilesDirectory)AssemblyInfo.General.cs')"
+          Command="$(AssemblyInfoT4Command) &quot;$(_FilesDirectory)AssemblyInfo.General.tt&quot; -o &quot;$(_FilesDirectory)AssemblyInfo.General.cs&quot;" />
+    <Exec Condition="Exists('$(_FilesDirectory)AssemblyInfo.Version.tt') AND !Exists('$(_FilesDirectory)AssemblyInfo.Version.cs')"
+          Command="$(AssemblyInfoT4Command) &quot;$(_FilesDirectory)AssemblyInfo.Version.tt&quot; -o &quot;$(_FilesDirectory)AssemblyInfo.Version.cs&quot;" />
+  </Target>
 
 </Project>

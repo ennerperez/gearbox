@@ -7,52 +7,69 @@ namespace Gearbox.Shell.Services
 {
     public class WindowsNotificationManager : INotificationManager
     {
+        private readonly DesktopNotifications.Windows.WindowsNotificationManager _manager;
+        private bool _disposed;
+
         public WindowsNotificationManager(WindowsApplicationContext context)
         {
+            _manager = new DesktopNotifications.Windows.WindowsNotificationManager(context);
         }
 
         public Task Initialize()
         {
-            return Task.CompletedTask;
+            return _manager.Initialize();
         }
 
         public Task ShowNotification(Notification notification, DateTimeOffset? expirationTime = null)
         {
-            return Task.CompletedTask;
+            return _manager.ShowNotification(notification, expirationTime);
         }
 
         public Task HideNotification(Notification notification)
         {
-            return Task.CompletedTask;
+            return _manager.HideNotification(notification);
         }
 
         public Task ScheduleNotification(Notification notification, DateTimeOffset deliveryTime, DateTimeOffset? expirationTime = null)
         {
-            return Task.CompletedTask;
+            return _manager.ScheduleNotification(notification, deliveryTime, expirationTime);
         }
 
-        public string LaunchActionId { get; }
-        public NotificationManagerCapabilities Capabilities { get; }
+        public string LaunchActionId => _manager.LaunchActionId;
+        public NotificationManagerCapabilities Capabilities => _manager.Capabilities;
 
-#pragma warning disable CS0067
-        public event EventHandler<NotificationActivatedEventArgs> NotificationActivated;
-        public event EventHandler<NotificationDismissedEventArgs> NotificationDismissed;
-#pragma warning disable CS0067
+        public event EventHandler<NotificationActivatedEventArgs> NotificationActivated
+        {
+            add => _manager.NotificationActivated += value;
+            remove => _manager.NotificationActivated -= value;
+        }
+
+        public event EventHandler<NotificationDismissedEventArgs> NotificationDismissed
+        {
+            add => _manager.NotificationDismissed += value;
+            remove => _manager.NotificationDismissed -= value;
+        }
 
         #region IDisposable
 
         private void ReleaseUnmanagedResources()
         {
-            // TODO release unmanaged resources here
         }
 
         protected virtual void Dispose(bool disposing)
         {
+            if (_disposed)
+            {
+                return;
+            }
+
             ReleaseUnmanagedResources();
             if (disposing)
             {
-                // TODO release managed resources here
+                _manager.Dispose();
             }
+
+            _disposed = true;
         }
 
         public void Dispose()

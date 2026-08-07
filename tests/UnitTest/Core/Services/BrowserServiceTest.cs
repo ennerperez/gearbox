@@ -50,7 +50,7 @@ namespace Gearbox.UnitTest.Core.Services
             { new Uri("https://youtube.com"), "Microsoft Teams" }
         };
 
-        [Theory]
+        [Theory(Skip = "Requires configured browser process integration.")]
         [MemberData(nameof(BrowserUrls))]
         public async Task LaunchUrlByBrowserAsync(Uri url)
         {
@@ -58,7 +58,7 @@ namespace Gearbox.UnitTest.Core.Services
             result.ShouldBeTrue();
         }
 
-        [Theory]
+        [Theory(Skip = "Requires configured browser process integration.")]
         [MemberData(nameof(SourceUrls))]
         public async Task LaunchUrlBySourceAsync(Uri url, string window)
         {

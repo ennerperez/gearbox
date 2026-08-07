@@ -7,11 +7,13 @@
     mc:Ignorable="d"
     x:Class="Gearbox.Shell.Views.AboutWindow"
     x:DataType="vm:AboutWindowViewModel"
-    d:DesignWidth="320"
-    d:DesignHeight="240"
+    d:DesignWidth="560"
+    d:DesignHeight="620"
     x:Name="This"
-    Width="320"
-    Height="240"
+    Width="560"
+    Height="620"
+    MinWidth="480"
+    MinHeight="440"
     Icon="/App.ico"
     IsVisible="{Binding IsVisible}"
     Title="Gearbox">
@@ -22,28 +24,73 @@
         <vm:AboutWindowViewModel />
     </Design.DataContext>
 
-    <Border Classes="Container" CornerRadius="20">
-        <Grid RowDefinitions="48,*" RowSpacing="16">
+    <Border Classes="Container">
+        <Grid RowDefinitions="48,*">
             <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
-                <Border Grid.Column="0" Grid.ColumnSpan="3" CornerRadius="20,20,0,0" Background="{DynamicResource Brush.TitleBar}" />
-                <Button Grid.Column="2" CornerRadius="32" Width="32" Height="32" VerticalAlignment="Center" Margin="0,0,8,0" Command="{Binding ExitCommand}" ToolTip.Tip="Exit">
-                    <Image Width="16" Height="16" Stretch="Uniform">
+                <Border Classes="TitleBar" Grid.Column="0" Grid.ColumnSpan="3" />
+                <StackPanel Classes="WindowTitle" Grid.Column="0" Grid.ColumnSpan="2">
+                    <Image Classes="WindowTitleIcon" Source="/Assets/gearbox.png" />
+                    <TextBlock Classes="WindowTitleText" Text="{Binding Title}" />
+                </StackPanel>
+                <Button Grid.Column="2" Classes="ChromeButton CloseButton" Margin="0,0,8,0" Command="{Binding ExitCommand}" ToolTip.Tip="Exit">
+                    <Image Classes="ChromeIcon">
                         <Image.Source>
                             <SvgImage Source="/Assets/Icons/close-x.svg" Css="path { fill: #fff; }" />
                         </Image.Source>
                     </Image>
                 </Button>
             </Grid>
-            <Grid Grid.Row="1" ColumnDefinitions="*">
-                <StackPanel Margin="10" Orientation="Vertical">
-                    <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" />
-                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
-                    <TextBlock Text="{Binding Version}" FontStyle="Italic" />
-                    <TextBlock Text="{Binding Copyright}" />
-                    <TextBlock Text="{Binding License}" />
-                    <Button Command="{Binding OpenWebsiteCommand}" Content="Visit Website" />
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Classes="AboutContent">
+                    <Grid ColumnDefinitions="96,*" ColumnSpacing="20">
+                        <Border Classes="AboutHeroIconFrame" Grid.Column="0">
+                            <Image Classes="AboutHeroIcon" Source="/Assets/gearbox.png" />
+                        </Border>
+                        <StackPanel Classes="AboutHeroText" Grid.Column="1">
+                            <TextBlock Classes="AboutTitle" Text="{Binding Title}" />
+                            <TextBlock Classes="AboutTagline" Text="{Binding Tagline}" />
+                            <TextBlock Classes="AboutMuted" Text="{Binding Description}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Classes="AboutSection">
+                        <StackPanel Classes="AboutSectionContent">
+                            <TextBlock Classes="AboutSectionTitle" Text="Application" />
+                            <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="12">
+                                <TextBlock Classes="AboutLabel" Grid.Row="0" Grid.Column="0" Text="Version" />
+                                <TextBlock Classes="AboutValue" Grid.Row="0" Grid.Column="1" Text="{Binding Version}" />
+                                <TextBlock Classes="AboutLabel" Grid.Row="1" Grid.Column="0" Text="License" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding License}" />
+                                <TextBlock Classes="AboutLabel" Grid.Row="2" Grid.Column="0" Text="Website" />
+                                <TextBlock Classes="AboutValue" Grid.Row="2" Grid.Column="1" Text="{Binding WebsiteUrl}" />
+                                <TextBlock Classes="AboutLabel" Grid.Row="3" Grid.Column="0" Text="Copyright" />
+                                <TextBlock Classes="AboutValue" Grid.Row="3" Grid.Column="1" Text="{Binding Copyright}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="AboutSection">
+                        <StackPanel Classes="AboutSectionContent">
+                            <TextBlock Classes="AboutSectionTitle" Text="System" />
+                            <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="12">
+                                <TextBlock Classes="AboutLabel" Grid.Row="0" Grid.Column="0" Text="OS" />
+                                <TextBlock Classes="AboutValue" Grid.Row="0" Grid.Column="1" Text="{Binding OperatingSystem}" />
+                                <TextBlock Classes="AboutLabel" Grid.Row="1" Grid.Column="0" Text="Runtime" />
+                                <TextBlock Classes="AboutValue" Grid.Row="1" Grid.Column="1" Text="{Binding Runtime}" />
+                                <TextBlock Classes="AboutLabel" Grid.Row="2" Grid.Column="0" Text="Architecture" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Architecture}" />
+                                <TextBlock Classes="AboutLabel" Grid.Row="3" Grid.Column="0" Text="Data folder" />
+                                <TextBlock Classes="AboutValue" Grid.Row="3" Grid.Column="1" Text="{Binding DataDirectory}" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid RowDefinitions="*,Auto" RowSpacing="6">
+                        <TextBlock Classes="AboutPurpose" Grid.Row="0" Text="{Binding SystemPurpose}" />
+                        <Button Grid.Row="1" Command="{Binding OpenWebsiteCommand}" Content="Visit Website" MinWidth="128" />
+                    </Grid>
                 </StackPanel>
-            </Grid>
+            </ScrollViewer>
         </Grid>
     </Border>
 </Window>

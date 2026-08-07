@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Enviroments">
-    <None Include="$(SourceDirectory)\.env" Condition="Exists('$(SourceDirectory)\.env')">
+    <None Include="$(SourceDirectory).env" Condition="Exists('$(SourceDirectory).env')">
       <Link>.env</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -77,8 +77,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Watch Remove="wwwroot\**\*" />
-    <Watch Remove=".\Logs\*" />
+    <Watch Remove="wwwroot\**\*"/>
+    <Watch Remove=".\Logs\*"/>
   </ItemGroup>
 
 </Project>

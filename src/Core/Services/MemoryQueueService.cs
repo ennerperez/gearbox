@@ -29,6 +29,8 @@ namespace Gearbox.Core.Services
 
         public Task<IEnumerable<PeekedMessage>> PeekMessagesAsync(string queueName = "", int? maxMessages = null, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (!s_channel.TryGetValue(queueName, out Channel<object> value))
             {
                 value = Channel.CreateUnbounded<object>();
@@ -36,13 +38,25 @@ namespace Gearbox.Core.Services
             }
 
             var result = new List<PeekedMessage>();
-            while (value.Reader.Count > 0)
+            var remainingMessages = new List<object>();
+            var limit = maxMessages ?? 1;
+            while (value.Reader.TryRead(out var message))
             {
-                value.Reader.TryPeek(out var message);
-                if (message != null)
+                if (message == null)
+                {
+                    continue;
+                }
+
+                remainingMessages.Add(message);
+                if (result.Count < limit)
                 {
                     result.Add((PeekedMessage)message);
                 }
+            }
+
+            foreach (var message in remainingMessages)
+            {
+                value.Writer.TryWrite(message);
             }
 
             return Task.FromResult(result.AsEnumerable());
@@ -63,6 +77,8 @@ namespace Gearbox.Core.Services
 
         public Task<IEnumerable<QueueMessage>> ReceiveMessagesAsync(string queueName = "", int? maxMessages = null, TimeSpan? visibilityTimeout = null, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (!s_channel.TryGetValue(queueName, out Channel<object> value))
             {
                 value = Channel.CreateUnbounded<object>();
@@ -70,9 +86,9 @@ namespace Gearbox.Core.Services
             }
 
             var result = new List<QueueMessage>();
-            while (value.Reader.Count > 0)
+            var limit = maxMessages ?? 1;
+            while (result.Count < limit && value.Reader.TryRead(out var message))
             {
-                value.Reader.TryRead(out var message);
                 if (message != null)
                 {
                     result.Add((QueueMessage)message);
@@ -102,7 +118,30 @@ namespace Gearbox.Core.Services
 
         public Task DeleteMessageAsync(QueueMessage message, string queueName = "", CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (message == null || !s_channel.TryGetValue(queueName, out Channel<object> value))
+            {
+                return Task.CompletedTask;
+            }
+
+            var remainingMessages = new List<object>();
+            while (value.Reader.TryRead(out var queuedMessage))
+            {
+                if (queuedMessage is QueueMessage queueMessage && queueMessage.MessageId == message.MessageId)
+                {
+                    continue;
+                }
+
+                remainingMessages.Add(queuedMessage);
+            }
+
+            foreach (var queuedMessage in remainingMessages)
+            {
+                value.Writer.TryWrite(queuedMessage);
+            }
+
+            return Task.CompletedTask;
         }
     }
 }
