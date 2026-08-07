@@ -5,6 +5,10 @@
             <Color x:Key="Color.Window">#FFF0F5F9</Color>
             <Color x:Key="Color.WindowBorder">#00000000</Color>
             <Color x:Key="Color.TitleBar">#FFCFDEEA</Color>
+            <Color x:Key="Color.ToolBar">#FFE4ECF3</Color>
+            <Color x:Key="Color.CardHover">#FFE4ECF3</Color>
+            <Color x:Key="Color.CardPressed">#FFD4E0EA</Color>
+            <Color x:Key="Color.CardAccentBorder">#FF63B78F</Color>
             <Color x:Key="Color.Danger">#80FF9797</Color>
             <Color x:Key="Color.Border0">#FFCFCFCF</Color>
             <Color x:Key="Color.Border1">#FF898989</Color>
@@ -15,6 +19,9 @@
             <Color x:Key="Color.WindowBorder">#FF444444</Color>
             <Color x:Key="Color.TitleBar">#FF1F1F1F</Color>
             <Color x:Key="Color.ToolBar">#FF2C2C2C</Color>
+            <Color x:Key="Color.CardHover">#FF2C2C2C</Color>
+            <Color x:Key="Color.CardPressed">#FF373737</Color>
+            <Color x:Key="Color.CardAccentBorder">#FF63B78F</Color>
             <Color x:Key="Color.Danger">#80FF9797</Color>
             <Color x:Key="Color.Border0">#FFCFCFCF</Color>
             <Color x:Key="Color.Border1">#FF898989</Color>
@@ -45,6 +52,9 @@
     <SolidColorBrush x:Key="Brush.WindowBorder" Color="{DynamicResource Color.WindowBorder}"/>
     <SolidColorBrush x:Key="Brush.TitleBar" Color="{DynamicResource Color.TitleBar}"/>
     <SolidColorBrush x:Key="Brush.ToolBar" Color="{DynamicResource Color.ToolBar}"/>
+    <SolidColorBrush x:Key="Brush.CardHover" Color="{DynamicResource Color.CardHover}"/>
+    <SolidColorBrush x:Key="Brush.CardPressed" Color="{DynamicResource Color.CardPressed}"/>
+    <SolidColorBrush x:Key="Brush.CardAccentBorder" Color="{DynamicResource Color.CardAccentBorder}"/>
     <SolidColorBrush x:Key="Brush.Border0" Color="{DynamicResource Color.Border0}"/>
     <SolidColorBrush x:Key="Brush.Border1" Color="{DynamicResource Color.Border1}"/>
     <SolidColorBrush x:Key="Brush.Border2" Color="{DynamicResource Color.Border2}"/>
