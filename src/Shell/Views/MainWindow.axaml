@@ -13,8 +13,8 @@
     x:Name="This"
     ExtendClientAreaToDecorationsHint="true"
     WindowStartupLocation="CenterOwner"
-    Width="584"
-    Height="{OnPlatform Default=224, Windows=192}"
+    Width="640"
+    Height="{OnPlatform Default=202, Windows=200}"
     Icon="/App.ico"
     Title="Gearbox">
 
@@ -24,11 +24,11 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Border Classes="Container" IsVisible="{Binding IsNotBusy}">
-        <Grid RowDefinitions="32,*" RowSpacing="16">
+    <Border Classes="Container" CornerRadius="2" IsVisible="{Binding IsNotBusy}">
+        <Grid RowDefinitions="44,*">
             <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
-                <Border Grid.Column="0" Grid.ColumnSpan="3" Background="{DynamicResource Brush.TitleBar}" />
-                <Button Grid.Column="0" Width="32" Height="32" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip.Tip="Menu" >
+                <Border Classes="TitleBar" Grid.Column="0" Grid.ColumnSpan="3" />
+                <Button Classes="ChromeButton" Grid.Column="0" Margin="6,0,0,0" ToolTip.Tip="Menu" >
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedLeft" VerticalOffset="-8" HorizontalOffset="8">
                             <!--<MenuItem Header="Register" Command="{Binding RegisterCommand}" />-->
@@ -37,15 +37,15 @@
                             <MenuItem Header="About..." Command="{Binding AboutCommand}" />
                         </MenuFlyout>
                     </Button.Flyout>
-                    <Image Width="16" Height="16" Stretch="Uniform">
+                    <Image Classes="ChromeIcon">
                         <Image.Source>
                             <SvgImage Source="/Assets/Icons/menu-burger.svg" Css="path { fill: #fff; }" />
                         </Image.Source>
                     </Image>
                 </Button>
-                <TextBox Grid.Column="1" Margin="8" Text="{Binding Url, Mode=OneWay}" IsEnabled="False" />
-                <Button Classes="CloseButton" Grid.Column="2" Width="32" Height="32" VerticalAlignment="Center" Margin="0,0,8,0" Command="{Binding ExitCommand}"  ToolTip.Tip="Exit">
-                    <Image Width="16" Height="16" Stretch="Uniform">
+                <TextBox Grid.Column="1" Margin="6,6" Text="{Binding Url, Mode=OneWay}" IsEnabled="False" />
+                <Button Classes="ChromeButton CloseButton" Grid.Column="2" Margin="0,0,6,0" Command="{Binding ExitCommand}"  ToolTip.Tip="Exit">
+                    <Image Classes="ChromeIcon">
                         <Image.Source>
                             <SvgImage Source="/Assets/Icons/close-x.svg" Css="path { fill: #fff; }" />
                         </Image.Source>
@@ -56,21 +56,21 @@
                 <ScrollViewer PointerWheelChanged="InputElement_OnPointerWheelChanged" IsEnabled="{Binding IsNotBusy}"
                               VerticalScrollBarVisibility="Disabled"
                               HorizontalScrollBarVisibility="Auto">
-                    <ItemsControl Margin="10" ItemsSource="{Binding Browsers}">
+                    <ItemsControl ItemsSource="{Binding Browsers}">
                         
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Vertical" HorizontalAlignment="Stretch" ItemsAlignment="Center" ItemSpacing="16"/>
+                                <WrapPanel Classes="BrowserPanel"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="interfaces:IBrowser">
-                                <Button Margin="0,0,16,0" Width="128" Height="128" VerticalAlignment="Center" ToolTip.Tip="{Binding Name}"
+                                <Button Classes="BrowserCard" ToolTip.Tip="{Binding Name}"
                                         Command="{Binding $parent.((vm:MainWindowViewModel)DataContext).InvokeBrowserCommand}" CommandParameter="{Binding .}">
-                                    <StackPanel Orientation="Vertical">
-                                        <Svg Width="48" Margin="16" Path="{Binding Icon}"  Stretch="Fill" />
-                                        <TextBlock Text="{Binding Name}" HorizontalAlignment="Stretch" TextAlignment="Center" />
+                                    <StackPanel Classes="BrowserCardContent">
+                                        <Svg Classes="BrowserCardIcon" Path="{Binding Icon}" />
+                                        <TextBlock Classes="BrowserCardName" Text="{Binding Name}" />
                                     </StackPanel>
                                 </Button>
                             </DataTemplate>
