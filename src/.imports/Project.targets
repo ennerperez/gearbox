@@ -5,4 +5,10 @@
     <DefineConstants Condition="'$(BuildConstants)' != ''">$(BuildConstants)$(DefineConstants)</DefineConstants>
     <DefineConstants Condition="'$(BuildConstants)' == ''">$(DefineConstants)</DefineConstants>
   </PropertyGroup>
+
+  <!-- Remove LatoFont (from QuestPDF) -->
+  <Target Condition="'$(UsingQuestPDF)' == 'true'" Name="RemoveLatoFontAfterPublish" AfterTargets="Publish">
+    <RemoveDir Directories="$(PublishDir)\LatoFont"/>
+  </Target>
+
 </Project>

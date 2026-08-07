@@ -47,6 +47,7 @@
     <File Path="src/.imports/Project.targets" />
     <File Path="src/.imports/Template.props" />
     <File Path="src/.imports/Template.targets" />
+    <File Path="src\.imports\Tests.props" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/UnitTest/UnitTest.csproj" />

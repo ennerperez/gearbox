@@ -20,8 +20,8 @@
     <_EnvFile>$(SourceDirectory).env</_EnvFile>
   </PropertyGroup>
 
-  <Import Project="$(_ImportDirectory)Features.props"/>
-  <Import Project="$(_ImportDirectory)Project.props"/>
+  <Import Condition="Exists('$(_ImportDirectory)Features.props')" Project="$(_ImportDirectory)Features.props"/>
+  <Import Condition="Exists('$(_ImportDirectory)Project.props')" Project="$(_ImportDirectory)Project.props"/>
 
   <Import Condition="Exists('$(MSBuildProjectDirectory)\Options.props')" Project="$(MSBuildProjectDirectory)\Options.props"/>
 
