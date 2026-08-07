@@ -1,5 +1,7 @@
 ﻿using System.Runtime.Versioning;
+#if LINUX
 using Gearbox.Core.Natives.Linux.Interop;
+#endif
 using Shouldly;
 using Xunit;
 
