@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Versioning;
-using System.Text;
 using System.Threading.Tasks;
 using Gearbox.Core.Interfaces;
 using Gearbox.Core.Natives.Windows.Interop;
@@ -31,12 +30,12 @@ namespace Gearbox.Core.Natives.Windows
         {
             var result = string.Empty;
             const int nChars = 256;
-            var buff = new StringBuilder(nChars);
+            var buff = new char[nChars];
             var handle = User32.GetForegroundWindow();
 
-            if (User32.GetWindowText(handle, buff.ToString(), nChars) > 0)
+            if (User32.GetWindowText(handle, buff, nChars) > 0)
             {
-                result = buff.ToString();
+                result = new string(buff).TrimEnd('\0');
             }
 
             return result;

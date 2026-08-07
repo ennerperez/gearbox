@@ -13,7 +13,7 @@ namespace Gearbox.Core.Natives.Windows.Interop
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories)]
-        internal static extern int GetWindowText(nint hWnd, string text, int count);
+        internal static extern int GetWindowText(nint hWnd, char[] text, int count);
 
         [DllImport("user32.dll", SetLastError = true, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories)]

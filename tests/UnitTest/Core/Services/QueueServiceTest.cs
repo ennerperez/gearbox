@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Gearbox.Core.Models;
@@ -66,6 +67,36 @@ namespace Gearbox.UnitTest.Core.Services
             remainingMessage.ShouldNotBeNull();
             remainingMessage.MessageText.ShouldBe(secondContent);
             emptyMessage.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task PeekMessagesAsyncHonorsMaxMessagesWithoutDequeuing()
+        {
+            var queueName = Guid.NewGuid().ToString();
+
+            await _queueService.SendMessageAsync(queueName, Guid.NewGuid().ToString());
+            await _queueService.SendMessageAsync(queueName, Guid.NewGuid().ToString());
+
+            var peekedMessages = await _queueService.PeekMessagesAsync(queueName, 1);
+            var receivedMessages = await _queueService.ReceiveMessagesAsync(queueName, 2);
+
+            peekedMessages.Count().ShouldBe(1);
+            receivedMessages.Count().ShouldBe(2);
+        }
+
+        [Fact]
+        public async Task ReceiveMessagesAsyncHonorsMaxMessages()
+        {
+            var queueName = Guid.NewGuid().ToString();
+
+            await _queueService.SendMessageAsync(queueName, Guid.NewGuid().ToString());
+            await _queueService.SendMessageAsync(queueName, Guid.NewGuid().ToString());
+
+            var receivedMessages = await _queueService.ReceiveMessagesAsync(queueName, 1);
+            var remainingMessage = await _queueService.ReceiveMessageAsync(queueName);
+
+            receivedMessages.Count().ShouldBe(1);
+            remainingMessage.ShouldNotBeNull();
         }
     }
 }
