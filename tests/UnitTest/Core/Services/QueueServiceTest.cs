@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.Tasks;
+using Gearbox.Core.Models;
 using Gearbox.Core.Services;
 using Shouldly;
 using Xunit;
@@ -44,6 +45,27 @@ namespace Gearbox.UnitTest.Core.Services
             message.ShouldNotBeNull();
             message.MessageText.ShouldNotBeNullOrWhiteSpace();
             //messages.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task DeleteMessageAsyncRemovesMatchingMessageAndKeepsRemainingOrder()
+        {
+            var queueName = Guid.NewGuid().ToString();
+            var firstContent = Guid.NewGuid().ToString();
+            var secondContent = Guid.NewGuid().ToString();
+
+            await _queueService.SendMessageAsync(queueName, firstContent);
+            await _queueService.SendMessageAsync(queueName, secondContent);
+
+            var message = (QueueMessage)await _queueService.PeekMessageAsync(queueName);
+            await _queueService.DeleteMessageAsync(message, queueName);
+
+            var remainingMessage = await _queueService.ReceiveMessageAsync(queueName);
+            var emptyMessage = await _queueService.ReceiveMessageAsync(queueName);
+
+            remainingMessage.ShouldNotBeNull();
+            remainingMessage.MessageText.ShouldBe(secondContent);
+            emptyMessage.ShouldBeNull();
         }
     }
 }

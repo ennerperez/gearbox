@@ -102,7 +102,30 @@ namespace Gearbox.Core.Services
 
         public Task DeleteMessageAsync(QueueMessage message, string queueName = "", CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (message == null || !s_channel.TryGetValue(queueName, out Channel<object> value))
+            {
+                return Task.CompletedTask;
+            }
+
+            var remainingMessages = new List<object>();
+            while (value.Reader.TryRead(out var queuedMessage))
+            {
+                if (queuedMessage is QueueMessage queueMessage && queueMessage.MessageId == message.MessageId)
+                {
+                    continue;
+                }
+
+                remainingMessages.Add(queuedMessage);
+            }
+
+            foreach (var queuedMessage in remainingMessages)
+            {
+                value.Writer.TryWrite(queuedMessage);
+            }
+
+            return Task.CompletedTask;
         }
     }
 }
