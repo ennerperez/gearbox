@@ -42,13 +42,15 @@ namespace Gearbox.Core.Services
             var limit = maxMessages ?? 1;
             while (value.Reader.TryRead(out var message))
             {
-                if (message != null)
+                if (message == null)
                 {
-                    remainingMessages.Add(message);
-                    if (result.Count < limit)
-                    {
-                        result.Add((PeekedMessage)message);
-                    }
+                    continue;
+                }
+
+                remainingMessages.Add(message);
+                if (result.Count < limit)
+                {
+                    result.Add((PeekedMessage)message);
                 }
             }
 
