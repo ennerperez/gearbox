@@ -1,17 +1,17 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
+using OS = System.Runtime.OperatingSystemExtensions;
 
 namespace Gearbox.Shell.ViewModels
 {
     public partial class AboutWindowViewModel : ViewModelBase
     {
         private const string FallbackWebsiteUrl = "https://github.com/ennerperez/gearbox";
-
-        private string _websiteUrl = FallbackWebsiteUrl;
 
 #if DEBUG
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
@@ -32,10 +32,16 @@ namespace Gearbox.Shell.ViewModels
             Version = metadata.DisplayVersion ?? assembly.InformationalVersion() ?? assembly.GetName().Version?.ToString() ?? string.Empty;
             Copyright = assembly.Copyright() ?? GetMetadataValue(assembly, "Copyright") ?? $"Copyright (c) {DateTime.Now.Year}";
             License = GetMetadataValue(assembly, "PackageLicenseExpression") ?? GetMetadataValue(assembly, "License") ?? "MIT";
-            _websiteUrl = NormalizeWebsiteUrl(
+            WebsiteUrl = NormalizeWebsiteUrl(
                 GetMetadataValue(assembly, "PackageProjectUrl") ??
                 GetMetadataValue(assembly, "RepositoryUrl") ??
                 FallbackWebsiteUrl);
+            Tagline = "Cross-platform rule-based browser launcher";
+            SystemPurpose = "Gearbox routes links to the right browser using URL, file type, and source-window rules.";
+            OperatingSystem = $"{OS.GetName()} {RuntimeInformation.OSDescription}".Trim();
+            Runtime = RuntimeInformation.FrameworkDescription;
+            Architecture = $"{RuntimeInformation.OSArchitecture} OS / {RuntimeInformation.ProcessArchitecture} process";
+            DataDirectory = OS.GetDataDir();
         }
 
         [RelayCommand(CanExecute = nameof(IsNotBusy))]
@@ -49,7 +55,7 @@ namespace Gearbox.Shell.ViewModels
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = _websiteUrl,
+                FileName = WebsiteUrl,
                 UseShellExecute = true
             });
         }
@@ -91,5 +97,26 @@ namespace Gearbox.Shell.ViewModels
 
         [ObservableProperty]
         private string _license;
+
+        [ObservableProperty]
+        private string _websiteUrl = FallbackWebsiteUrl;
+
+        [ObservableProperty]
+        private string _tagline;
+
+        [ObservableProperty]
+        private string _systemPurpose;
+
+        [ObservableProperty]
+        private string _operatingSystem;
+
+        [ObservableProperty]
+        private string _runtime;
+
+        [ObservableProperty]
+        private string _architecture;
+
+        [ObservableProperty]
+        private string _dataDirectory;
     }
 }
